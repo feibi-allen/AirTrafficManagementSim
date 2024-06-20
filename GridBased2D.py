@@ -5,7 +5,19 @@ class Airspace(object):
         self.env = env
         self.aircraft = []
 
-    def add
+    def addDrone(self,drone):
+        self.aircraft.append(drone)
+
+    def removeDrone(self,drone):
+        self.aircraft.remove(drone)
+
+    def run(self):
+        while True:
+            # check next move for all drones
+            # compair for collisions
+            # resolve collisions
+            #
+            pass
 
 
 class Drone(object):
