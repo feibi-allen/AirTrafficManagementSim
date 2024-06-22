@@ -26,5 +26,6 @@ class Car(object):
 
 
 env = simpy.Environment()
-car = Car(env)
+car0 = Car(env)
+car1 = Car(env)
 env.run(until=15)

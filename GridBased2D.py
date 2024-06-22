@@ -4,7 +4,7 @@ import simpy
 class Airspace(object):
     def __init__(self, env):
         self.env = env
-        self.activeSpace = env.process(self.run())
+        # self.activeSpace = env.process(self.run())
         self.aircraft = []
 
     def add_drone(self, drone):
@@ -12,6 +12,10 @@ class Airspace(object):
 
     def remove_drone(self, drone):
         self.aircraft.remove(drone)
+
+    def get_drones(self):
+        for drone in self.aircraft:
+            print(drone.get_id())
 
     def run(self):
         while True:
@@ -23,14 +27,18 @@ class Airspace(object):
 
 
 class Drone(object):
-    def __init__(self, env, speed, start, end):
+    def __init__(self, env, id, speed, start, end):
         self.env = env
-        self.flightProcess = env.process(self.fly_path())
+        # self.flightProcess = env.process(self.fly_path())
+        self.id = id
         self.speed = speed
         self.start = start
         self.end = end
         self.pos = start
         self.nextMove = None
+
+    def get_id(self):
+        return self.id
 
     def set_next_move(self):
         while not (self.pos == self.end):
@@ -52,3 +60,10 @@ class Drone(object):
 
     def finished(self):
         return self.pos == self.end
+
+
+env = simpy.Environment()
+drone = Drone(env,111,10,10,10)
+airspace = Airspace(env)
+airspace.add_drone(drone)
+airspace.get_drones()
