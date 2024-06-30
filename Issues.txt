@@ -1,0 +1,10 @@
+Drones:
+- collision resolve
+    - priority
+    - speed
+
+- collision checking
+    - reduce number of checks a drone must do by only checking adjacent (ish) positions
+        perhaps using graphs?
+
+- starting protection

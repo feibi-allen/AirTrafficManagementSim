@@ -28,11 +28,14 @@ class Drone(object):
         return self.nextMove()
 
     def move(self):
-        self.pos[0], self.pos[1] = self.nextMove[0], self.nextMove[1]
+        self.pos = (self.nextMove[0], self.nextMove[1])
 
     def fly_path(self):
         # wait for schedule time
         yield self.env.timeout(self.startTime)
+
+        self.set_next_move()
+        self.check_collision()
         pass
 
     def finished(self):
