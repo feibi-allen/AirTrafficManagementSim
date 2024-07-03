@@ -40,3 +40,8 @@ class Drone(object):
 
     def finished(self):
         return self.pos == self.end
+
+    def get_velocity(self):
+        return self.speed
+    def get_start(self):
+        return self.start
