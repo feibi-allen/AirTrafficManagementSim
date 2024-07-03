@@ -8,3 +8,6 @@ Drones:
         perhaps using graphs?
 
 - starting protection
+
+- paths in opposite directions
+    - hot to resolve

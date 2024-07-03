@@ -5,6 +5,8 @@ class Airspace(object):
         self.next_pos = {}
 
     # im so confused
+    def __force_yield(self,drone):
+        pass
     def __imminent_collision(self, drone):
         """
         :param: (object) Takes the asking drone
