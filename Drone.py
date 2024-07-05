@@ -1,47 +1,24 @@
 import simpy
 
+
 class Drone(object):
-    def __init__(self, env, id, speed, start, end, startTime):
-        self.env = env
-        self.flightProc = env.process(self.fly_path())
-        self.id = id
-        self.speed = speed
+    def __init__(self, start, end, velocity):
         self.start = start
         self.end = end
-        self.pos = start
-        self.nextMove = None
-        self.startTime = startTime
-
-    def get_id(self):
-        return self.id
-
-    def set_next_move(self):
-        while not (self.pos == self.end):
-            if self.pos[0] != self.end[0]:
-                # set next move towards x-pos
-                pass
-            else:
-                # set next move towards y-pos
-                pass
-
-    def check_collision(self):
-        return self.nextMove()
-
-    def move(self):
-        self.pos = (self.nextMove[0], self.nextMove[1])
-
-    def fly_path(self):
-        # wait for schedule time
-        yield self.env.timeout(self.startTime)
-
-        self.set_next_move()
-        self.check_collision()
-        pass
+        self.velocity = velocity
+        self.pos = self.start
 
     def finished(self):
         return self.pos == self.end
 
     def get_velocity(self):
-        return self.speed
+        return self.velocity
+
     def get_start(self):
         return self.start
+
+    def get_end(self):
+        return self.end
+
+    def get_position(self):
+        return self.pos

@@ -11,25 +11,26 @@ class Airspace(object):
 
     def predict_collisions(self, drone):
         """
-        Calculates when drones will collide based on start pos and velocity
+        Calculates when drones will collide based on pos pos and velocity
+        (quadratic of distance between drones against time)
         :param drone: asking drone
         :return:
         """
         # assign variables
-        start_x, start_y = drone.get_start()[0], drone.get_start()[1]
+        pos_x, pos_y = drone.get_pos()[0], drone.get_pos()[1]
         x_vel, y_vel = drone.get_velocity()[0], drone.get_velocity()[0]
         # dont check itself
         for other_drone in self.drones.remove(drone):
             # assign variables
-            other_start_x, other_start_y = other_drone.get_start()[0], \
-                other_drone.get_start()[1]
+            other_pos_x, other_pos_y = other_drone.get_pos()[0], \
+                other_drone.get_pos()[1]
             other_x_vel, other_y_vel = other_drone.get_velocity[0], \
                 other_drone.get_velocity[1]
 
             # maths variables
-            delta_x = other_start_x - start_x
+            delta_x = other_pos_x - pos_x
             delta_x_vel = other_x_vel - x_vel
-            delta_y = other_start_y - start_y
+            delta_y = other_pos_y - pos_y
             delta_y_vel = other_y_vel - y_vel
 
             a = (delta_x_vel ^ 2) + (delta_y_vel ^ 2)
@@ -61,9 +62,9 @@ class Airspace(object):
         :param point_of_collision:
         :return:
         """
-        d_start_x, d_start_y = drone.get_start()[0], drone.get_start()[1]
-        od_start_x, od_start_y = other_drone.get_start()[0], \
-        other_drone.get_start()[1]
+        d_pos_x, d_pos_y = drone.get_pos()[0], drone.get_pos()[1]
+        od_pos_x, od_pos_y = other_drone.get_pos()[0], \
+        other_drone.get_pos()[1]
         # FIXME - fill rest
         return True
 
