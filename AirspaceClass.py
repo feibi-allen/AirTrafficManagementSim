@@ -14,7 +14,10 @@ class Airspace(object):
         print("drone added:",drone.get_id())
     def predict_collisions(self, drone):
         """
-        Calculates when drones will collide based on position and velocity
+        Calculates time (from drones current position) to which safety 
+        circumference around the drones will intersect based on position 
+        and velocity. Since calculations are only made when both drones are 
+        moving time is the same for both.
         (quadratic of distance between drones against time)
         :param drone: asking drone
         :return:
@@ -45,7 +48,6 @@ class Airspace(object):
             print("delt y vel:", delta_y_vel)
 
             a = (delta_x_vel ** 2) + (delta_y_vel ** 2)
-            print("zero quared", 0**2)
             b = 2 * (delta_x * delta_x_vel + delta_y * delta_y_vel)
             c = (delta_x ** 2) + (delta_y ** 2) - (self.MINIMUM_DISTANCE ** 2)
             print("a:",a,"b:",b,"c:",c)
@@ -58,23 +60,24 @@ class Airspace(object):
                 print("no collision")
                 pass
             if (b**2) == 4 * a * c:
-                point_of_collision = (-b + math.sqrt((b ** 2) - 4 * a * c))/(2*a)
-                print("point of collision", point_of_collision)
-                # self.set_callback(drone, other_drone, point_of_collision)
+                time_of_collision = (-b + math.sqrt((b ** 2) - 4 * a * c))/(2*a)
+                print("point of collision", time_of_collision)
+                # self.set_callback(drone, other_drone, time_of_collision)
                 pass
             if (b**2) > 4 * a * c:
-                point_of_collision_1 = (-b + math.sqrt((b ** 2) - 4 * a * c))/(2*a)
-                point_of_collision_2 = (-b - math.sqrt((b ** 2) - 4 * a * c))/(2*a)
-                print("points of collisions", point_of_collision_1,point_of_collision_2)
+                time_of_collision_1 = (-b + math.sqrt((b ** 2) - 4 * a * c))/(2*a)
+                time_of_collision_2 = (-b - math.sqrt((b ** 2) - 4 * a * c))/(2*a)
+                print("points of collisions", time_of_collision_1,time_of_collision_2)
                 pass
             # set appropriate call backs
 
-    def _in_range(self, drone, other_drone, point_of_collision):
+    @staticmethod
+    def _in_range(self, drone, other_drone, time_of_collision):
         """
         Checks if intersection of drone paths will happen within path ranges
         :param drone:
         :param other_drone:
-        :param point_of_collision:
+        :param time_of_collision:
         :return:
         """
         d_pos_x, d_pos_y = drone.get_position()[0], drone.get_position()[1]
@@ -83,13 +86,20 @@ class Airspace(object):
         # FIXME - fill rest
         return True
 
-    def _set_callback(self, drone, other_drone, point_of_collision):
+    @staticmethod
+    def _calculate_time_to_arrival(self,drone):
+        c_pos_x, c_pos_y = drone.get_position()[0], drone.get_position()[1]
+        e_pos_x, e_pos_y = drone.get_end()[0],drone.get_end()[1]
+        distance = math.sqrt(((e_pos_x-c_pos_x)**2)+((e_pos_y-c_pos_y)**2))
+        return distance/drone.get_velocity
+
+    def _set_callback(self, drone, other_drone, time_of_collision):
         """
         Sets a callback for the two drones involved in the potential collision,
         so they can resolve it later
         :param drone:
         :param other_drone:
-        :param point_of_collision:
+        :param time_of_collision:
         :return:
         """
         pass
