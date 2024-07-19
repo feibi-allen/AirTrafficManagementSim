@@ -48,6 +48,7 @@ class Drone(object):
                     self.velocity[0] * self.moving_time), self.pos[1] + (
                                                self.velocity[
                                                    1] * self.moving_time)
+        self.pos[0],self.pos[1] = self.end[0],self.end[1]
 
     def stop(self):
         # check for collisions
