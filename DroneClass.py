@@ -4,7 +4,7 @@ TIME_STEP = 1  # Amount of time passed between each position update
 MAX_SPEED = 10 # Speed in ms-1
 
 class Drone(object):
-    def __init__(self, env, start, end, velocity, id):
+    def __init__(self, env, start, end, velocity, id, airspace):
         # FIXME - assert check velocity (try except)
         self.env = env
         self.start = start
@@ -12,9 +12,11 @@ class Drone(object):
         self.velocity = velocity
         self.pos = self.start
         self.id = id
+        self.airspace= airspace
         self.moving_time = 0
         #self.fly_process = env.process(self.fly())
         #env.process(self.stopping)
+        self.airspace.add_drone(self) # adds itself to the airspace
 
     def finished(self):
         return self.pos == self.end
@@ -43,12 +45,15 @@ class Drone(object):
                     time_to_move = 0
                 except simpy.Interrupt:
                     self.check_if_go()
+            # move the drone
             self.moving_time += TIME_STEP
             self.pos[0], self.pos[1] = self.pos[0] + (
                     self.velocity[0] * self.moving_time), self.pos[1] + (
                                                self.velocity[
                                                    1] * self.moving_time)
+        # update drone position
         self.pos[0],self.pos[1] = self.end[0],self.end[1]
+        self.airspace.remove_drone(self)
 
     def stop(self):
         # check for collisions

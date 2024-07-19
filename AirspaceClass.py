@@ -13,6 +13,10 @@ class Airspace(object):
         self.drones.append(drone)
         print("drone added:", drone.get_id())
 
+    def remove_drone(self,drone):
+        self.drones.remove(drone)
+        print("drone removed:", drone.get_id())
+
     def get_time_of_collisions(self, drone):
         """
         Calculates times (from drones current position) to which safety
