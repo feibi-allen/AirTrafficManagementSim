@@ -10,8 +10,8 @@ class Drone(object):
         self.velocity = velocity
         self.pos = self.start
         self.id = id
-        self.fly_process = env.process(self.fly())
-        env.process(self.stopping)
+        #self.fly_process = env.process(self.fly())
+        #env.process(self.stopping)
 
     def finished(self):
         return self.pos == self.end

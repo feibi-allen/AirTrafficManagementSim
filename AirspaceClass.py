@@ -21,9 +21,9 @@ class Airspace(object):
         moving time is the same for both.
         (quadratic of distance between drones against time)
         :param drone: asking drone
-        :return:
+        :return: dict of first upcoming collision (time,drone colliding with)
         """
-        collision_times = []
+        collision_times = {}
         # assign variables
         pos_x, pos_y = drone.get_position()[0], drone.get_position()[1]
         print("d1 pos:", pos_x, pos_y)
@@ -64,7 +64,7 @@ class Airspace(object):
                 print("point of collision", time_of_collision)
                 if self._in_range(drone, other_drone, time_of_collision):
                     print("within range")
-                    collision_times.append(time_of_collision)
+                    collision_times[other_drone] = time_of_collision
             if (b ** 2) > 4 * a * c:
                 time_of_collision_1 = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (2 * a)
                 time_of_collision_2 = (-b - math.sqrt((b ** 2) - 4 * a * c)) / (2 * a)
@@ -72,8 +72,9 @@ class Airspace(object):
                 print("first point of contact:", min(time_of_collision_2, time_of_collision_1))
                 if self._in_range(drone, other_drone, min(time_of_collision_2, time_of_collision_1)):
                     print("t min within range")
-                    collision_times.append(min(time_of_collision_2, time_of_collision_1))
-            print(collision_times)
+                    collision_times[other_drone] = min(time_of_collision_2, time_of_collision_1)
+            val = min([v for v in collision_times.values()])
+            print(list(collision_times.keys())[list(collision_times.values()).index(val)])
             # set appropriate call backs
 
     def _in_range(self, drone, other_drone, time_of_collision):
