@@ -30,55 +30,58 @@ class Airspace(object):
         collision_times = {}
         # assign variables
         pos_x, pos_y = drone.get_position()[0], drone.get_position()[1]
-        print("d1 pos:", pos_x, pos_y)
+        #print("d1 pos:", pos_x, pos_y)
         x_vel, y_vel = drone.get_velocity()[0], drone.get_velocity()[1]
-        print("d1 vels:", x_vel, y_vel)
+        #print("d1 vels:", x_vel, y_vel)
         # don't check itself
         for other_drone in [d for d in self.drones if d != drone]:
             # assign variables
             other_pos_x, other_pos_y = other_drone.get_position()[0], \
                 other_drone.get_position()[1]
-            print("d2 pos:", other_pos_x, other_pos_y)
+            #print("d2 pos:", other_pos_x, other_pos_y)
             other_x_vel, other_y_vel = other_drone.get_velocity()[0], \
                 other_drone.get_velocity()[1]
-            print("d2 vels:", other_x_vel, other_y_vel)
+            #print("d2 vels:", other_x_vel, other_y_vel)
 
             # maths variables
             delta_x = other_pos_x - pos_x
-            print("delt x:", delta_x)
+            #print("delt x:", delta_x)
             delta_x_vel = other_x_vel - x_vel
-            print("delt x vel:", delta_x_vel)
+            #print("delt x vel:", delta_x_vel)
             delta_y = other_pos_y - pos_y
-            print("delt y:", delta_y)
+            #print("delt y:", delta_y)
             delta_y_vel = other_y_vel - y_vel
-            print("delt y vel:", delta_y_vel)
+            #print("delt y vel:", delta_y_vel)
 
             a = (delta_x_vel ** 2) + (delta_y_vel ** 2)
             b = 2 * (delta_x * delta_x_vel + delta_y * delta_y_vel)
             c = (delta_x ** 2) + (delta_y ** 2) - (self.MINIMUM_DISTANCE ** 2)
-            print("a:", a, "b:", b, "c:", c)
+            #print("a:", a, "b:", b, "c:", c)
 
             # maths equations
 
-            # check b< or = or > 4ac
-            if (b ** 2) < 4 * a * c:
-                print("no collision")
+            # check b**2 = or > 4ac
             if (b ** 2) == 4 * a * c:
                 time_of_collision = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (2 * a)
-                print("point of collision", time_of_collision)
+                #print("point of collision", time_of_collision)
                 if self._in_range(drone, other_drone, time_of_collision):
-                    print("within range")
+                    #print("within range")
                     collision_times[other_drone] = time_of_collision
             if (b ** 2) > 4 * a * c:
                 time_of_collision_1 = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (2 * a)
                 time_of_collision_2 = (-b - math.sqrt((b ** 2) - 4 * a * c)) / (2 * a)
-                print("points of collisions", time_of_collision_1, time_of_collision_2)
-                print("first point of contact:", min(time_of_collision_2, time_of_collision_1))
+                #print("points of collisions", time_of_collision_1, time_of_collision_2)
+                #print("first point of contact:", min(time_of_collision_2, time_of_collision_1))
                 if self._in_range(drone, other_drone, min(time_of_collision_2, time_of_collision_1)):
-                    print("t min within range")
+                    #print("t min within range")
                     collision_times[other_drone] = min(time_of_collision_2, time_of_collision_1)
+        #print(collision_times)
+        if len(collision_times) > 0:
             val = min([v for v in collision_times.values()])
-            print(list(collision_times.keys())[list(collision_times.values()).index(val)])
+            print(list(collision_times.keys())[
+                list(collision_times.values()).index(val)])
+            return list(collision_times.keys())[list(collision_times.values()).index(val)]
+        return None
             # set appropriate call backs
 
     def _in_range(self, drone, other_drone, time_of_collision):
