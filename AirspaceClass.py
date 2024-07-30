@@ -63,6 +63,7 @@ class Airspace(object):
             time_of_collision = self.calculate_collision_time(a,b,c,drone,other_drone)
             if time_of_collision is not None:
                 collision_times[other_drone] = time_of_collision
+
         #print(collision_times)
         if len(collision_times) > 0:
             time_of_first_collision = min(

@@ -72,22 +72,19 @@ class Drone(object):
         while True:
             collision = self.airspace.get_time_of_first_collisions(self)
             print("checking", self.id,"for collision:",collision)
+
+            if not collision:
+                yield self.env.timeout(TIME_BETWEEN_CHECKS)
+                continue
+
             time_to_collision = next(iter(collision.values()))
-            # check if there is a collision before the next collision check so that an interrupt can be set for that time
-            # FIXME - check for empty dict
             if time_to_collision > TIME_BETWEEN_CHECKS:
                 print("Time between checks timed out")
                 yield self.env.timeout(TIME_BETWEEN_CHECKS)
             else:
                 yield self.env.timeout(time_to_collision)
-                print("Interrupting flight")
+                print("Interrupting flight", self.id)
                 self.fly_process.interrupt()
-        # check for collisions
-        # if no collisions within time boundary check again and repeat
-        # timeout for collisions
-        # interrupt after timeout
-        # repeat
-        pass
 
     def check_if_go(self):
         print("collision resolve,", self.id)
