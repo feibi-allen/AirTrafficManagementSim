@@ -13,11 +13,12 @@ class Airspace(object):
         self.drones.append(drone)
         print("drone added:", drone.get_id())
 
-    def remove_drone(self,drone):
+    def remove_drone(self, drone):
         self.drones.remove(drone)
         print("drone removed:", drone.get_id())
 
-    def get_time_of_collisions(self, drone):
+    def get_time_of_first_collisions(self, drone):
+        # FIXME - split into smaller functions
         """
         Calculates times (from drones current position) to which safety
         circumference around the drones will intersect based on position 
@@ -59,26 +60,38 @@ class Airspace(object):
             #print("a:", a, "b:", b, "c:", c)
 
             # maths equations
-
-            # check b**2 = or > 4ac
-            if (b ** 2) == 4 * a * c:
-                time_of_collision = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (2 * a)
-                #print("point of collision", time_of_collision)
-                if self._in_range(drone, other_drone, time_of_collision):
-                    #print("within range")
-                    collision_times[other_drone] = time_of_collision
-            if (b ** 2) > 4 * a * c:
-                time_of_collision_1 = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (2 * a)
-                time_of_collision_2 = (-b - math.sqrt((b ** 2) - 4 * a * c)) / (2 * a)
-                #print("points of collisions", time_of_collision_1, time_of_collision_2)
-                #print("first point of contact:", min(time_of_collision_2, time_of_collision_1))
-                if self._in_range(drone, other_drone, min(time_of_collision_2, time_of_collision_1)):
-                    #print("t min within range")
-                    collision_times[other_drone] = min(time_of_collision_2, time_of_collision_1)
+            time_of_collision = self.calculate_collision_time(a,b,c,drone,other_drone)
+            if time_of_collision is not None:
+                collision_times[other_drone] = time_of_collision
         #print(collision_times)
         if len(collision_times) > 0:
-            time_of_first_collision = min([val for val in collision_times.values()])
-            return {key: val for key, val in collision_times.items() if val == time_of_first_collision}
+            time_of_first_collision = min(
+                [val for val in collision_times.values()])
+            return {key: val for key, val in collision_times.items() if
+                    val == time_of_first_collision}
+        return None
+
+    def calculate_collision_time(self, a, b, c, drone, other_drone):
+        if a == 0:
+            return None
+        if (b ** 2) == 4 * a * c:
+            time_of_collision = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (
+                    2 * a)
+            # print("point of collision", time_of_collision)
+            if self._in_range(drone, other_drone, time_of_collision):
+                # print("within range")
+                return time_of_collision
+        if (b ** 2) > 4 * a * c:
+            time_of_collision_1 = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (
+                    2 * a)
+            time_of_collision_2 = (-b - math.sqrt((b ** 2) - 4 * a * c)) / (
+                    2 * a)
+            # print("points of collisions", time_of_collision_1, time_of_collision_2)
+            # print("first point of contact:", min(time_of_collision_2, time_of_collision_1))
+            if self._in_range(drone, other_drone,
+                              min(time_of_collision_2, time_of_collision_1)):
+                # print("t min within range")
+                return min(time_of_collision_2, time_of_collision_1)
         return None
 
     def _in_range(self, drone, other_drone, time_of_collision):
@@ -102,7 +115,8 @@ class Airspace(object):
         c_pos_x, c_pos_y = drone.get_position()[0], drone.get_position()[1]
         e_pos_x, e_pos_y = drone.get_end()[0], drone.get_end()[1]
         v_x, v_y = drone.get_velocity()[0], drone.get_velocity()[1]
-        distance = math.sqrt(((e_pos_x - c_pos_x) ** 2) + ((e_pos_y - c_pos_y) ** 2))
+        distance = math.sqrt(
+            ((e_pos_x - c_pos_x) ** 2) + ((e_pos_y - c_pos_y) ** 2))
         velocity = math.sqrt((v_y ** 2) + (v_x ** 2))
         return distance / velocity
 

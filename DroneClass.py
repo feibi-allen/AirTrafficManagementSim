@@ -70,8 +70,8 @@ class Drone(object):
         :return:
         """
         while True:
-            collision = self.airspace.get_time_of_collisions(self)
-            #print("checking", self.id,"for collision:",collision)
+            collision = self.airspace.get_time_of_first_collisions(self)
+            print("checking", self.id,"for collision:",collision)
             time_to_collision = next(iter(collision.values()))
             # check if there is a collision before the next collision check so that an interrupt can be set for that time
             # FIXME - check for empty dict
