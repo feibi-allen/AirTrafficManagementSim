@@ -1,3 +1,2 @@
 - finish env when all drones are removed
 - change drone initialization to take a speed and calculate velocity form that
-- fix why difference in position is changing each time step
