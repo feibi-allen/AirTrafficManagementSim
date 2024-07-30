@@ -25,7 +25,7 @@ class Airspace(object):
         moving time is the same for both.
         (quadratic of distance between drones against time)
         :param drone: asking drone
-        :return: dict of first upcoming collision (time,drone colliding with)
+        :return: dict of first upcoming collision (drone colliding with, time)
         """
         collision_times = {}
         # assign variables
@@ -77,10 +77,8 @@ class Airspace(object):
                     collision_times[other_drone] = min(time_of_collision_2, time_of_collision_1)
         #print(collision_times)
         if len(collision_times) > 0:
-            val = min([v for v in collision_times.values()])
-            print(list(collision_times.keys())[
-                list(collision_times.values()).index(val)])
-            return list(collision_times.keys())[list(collision_times.values()).index(val)]
+            time_of_first_collision = min([val for val in collision_times.values()])
+            return {key: val for key, val in collision_times.items() if val == time_of_first_collision}
         return None
             # set appropriate call backs
 
