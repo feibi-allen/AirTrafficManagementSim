@@ -80,7 +80,6 @@ class Airspace(object):
             time_of_first_collision = min([val for val in collision_times.values()])
             return {key: val for key, val in collision_times.items() if val == time_of_first_collision}
         return None
-            # set appropriate call backs
 
     def _in_range(self, drone, other_drone, time_of_collision):
         """
