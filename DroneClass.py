@@ -74,6 +74,7 @@ class Drone(object):
             #print("checking", self.id,"for collision:",collision)
             time_to_collision = next(iter(collision.values()))
             # check if there is a collision before the next collision check so that an interrupt can be set for that time
+            # FIXME - check for empty dict
             if time_to_collision > TIME_BETWEEN_CHECKS:
                 print("Time between checks timed out")
                 yield self.env.timeout(TIME_BETWEEN_CHECKS)

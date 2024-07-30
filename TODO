@@ -1,2 +1,3 @@
 - finish env when all drones are removed
 - interrupt when needed
+- change drone initialization to take a speed and calculate velocity form that
