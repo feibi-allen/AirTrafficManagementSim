@@ -45,9 +45,11 @@ class Drone(object):
         Change TIME_STEP for more accurate calculations
         :return:
         """
+        print("drone",self.id,self.env.now)
         while not self.end_point_passed():
             time_to_move = TIME_STEP
             print("time stepping:", self.id)
+            print(self.env.now)
             while time_to_move:
                 try:
                     yield self.env.timeout(time_to_move)
@@ -56,8 +58,9 @@ class Drone(object):
                     self.check_if_go()
             # move the drone
             self.moving_time += TIME_STEP
-            self.pos = (self.pos[0] + (self.velocity[0] * self.moving_time),
-                        self.pos[1] + (self.velocity[1] * self.moving_time))
+            self.pos = (self.start[0] + (self.velocity[0] * self.moving_time),
+                        self.start[1] + (self.velocity[1] * self.moving_time))
+            print("Drone",self.id,"pos:",self.pos)
         # update drone position
         self.pos = (self.end[0], self.end[1])
         self.airspace.remove_drone(self)
