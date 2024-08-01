@@ -1,3 +1,3 @@
 - finish env when all drones are removed
-
+- fix issue with collision (to do woth simpy timeing)
 - resolve collisions

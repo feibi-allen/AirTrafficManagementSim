@@ -2,7 +2,7 @@ import math
 
 import simpy
 
-TIME_STEP = 1  # Amount of time passed between each position update
+TIME_STEP = 1  # Amount of time passed between each position update (millisecond)
 MAX_SPEED = 10  # Speed in ms-1
 TIME_BETWEEN_CHECKS = 2  # Amount of time passed between checking for collision
 
@@ -71,22 +71,18 @@ class Drone(object):
         Change TIME_STEP for more accurate calculations
         :return:
         """
-        print("drone", self.id, self.env.now)
         while not self.end_point_passed():
             time_to_move = TIME_STEP
-            print("time stepping:", self.id)
-            print(self.env.now)
-            while time_to_move:
-                try:
-                    yield self.env.timeout(time_to_move)
-                    time_to_move = 0
-                except simpy.Interrupt:
-                    self.check_if_go()
-            # move the drone
-            self.moving_time += TIME_STEP
-            self.pos = (self.start[0] + (self.velocity[0] * self.moving_time),
-                        self.start[1] + (self.velocity[1] * self.moving_time))
-            print("Drone", self.id, "pos:", self.pos)
+            try:
+                yield self.env.timeout(time_to_move)
+                self.moving_time += TIME_STEP
+                self.pos = (
+                self.start[0] + (self.velocity[0] * self.moving_time),
+                self.start[1] + (self.velocity[1] * self.moving_time))
+                print(f"Time stepping: {self.id} to {self.pos} at time {self.env.now}")
+            except simpy.Interrupt:
+                self.check_if_go()
+
         # update drone position
         self.pos = (self.end[0], self.end[1])
         self.airspace.remove_drone(self)
@@ -100,19 +96,20 @@ class Drone(object):
         """
         while True:
             collision = self.airspace.get_time_of_first_collisions(self)
-            print("checking", self.id, "for collision:", collision)
+            print(f"checking {self.id} for collision:", collision)
 
             if not collision:
                 yield self.env.timeout(TIME_BETWEEN_CHECKS)
                 continue
 
             time_to_collision = next(iter(collision.values()))
+            print(f"Time to collision = {time_to_collision}")
             if time_to_collision > TIME_BETWEEN_CHECKS:
-                print("Time between checks timed out")
                 yield self.env.timeout(TIME_BETWEEN_CHECKS)
             else:
                 yield self.env.timeout(time_to_collision)
-                print("Interrupting flight", self.id)
+                self.fly_process.interrupt()
+                print(f"Interrupting flight {self.id} at {self.pos} at time {self.env.now}")
                 self.fly_process.interrupt()
 
     def check_if_go(self):

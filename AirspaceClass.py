@@ -105,9 +105,9 @@ class Airspace(object):
         """
         if time_of_collision < 0:
             return False
-        if time_of_collision > self._time_to_arrival(drone):
+        if time_of_collision >= self._time_to_arrival(drone):
             return False
-        if time_of_collision > self._time_to_arrival(other_drone):
+        if time_of_collision >= self._time_to_arrival(other_drone):
             return False
         return True
 
