@@ -120,14 +120,3 @@ class Airspace(object):
             ((e_pos_x - c_pos_x) ** 2) + ((e_pos_y - c_pos_y) ** 2))
         velocity = math.sqrt((v_y ** 2) + (v_x ** 2))
         return distance / velocity
-
-    def _set_callback(self, drone, other_drone, time_of_collision):
-        """
-        Sets a callback for the two drones involved in the potential collision,
-        so they can resolve it later
-        :param drone:
-        :param other_drone:
-        :param time_of_collision:
-        :return:
-        """
-        pass
