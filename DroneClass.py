@@ -1,3 +1,5 @@
+import math
+
 import simpy
 
 TIME_STEP = 1  # Amount of time passed between each position update
@@ -6,19 +8,43 @@ TIME_BETWEEN_CHECKS = 2  # Amount of time passed between checking for collision
 
 
 class Drone(object):
-    def __init__(self, env, start, end, velocity, id, airspace):
-        # FIXME - assert check velocity (try except)
+    def __init__(self, env, start, end, speed, id, airspace):
+        # FIXME - assert check inputs are valid (try except)
+        self.id = id
         self.env = env
         self.start = start
         self.end = end
-        self.velocity = velocity
+        self.speed = speed
+        self.velocity = self.calculate_velocity()
         self.pos = self.start
-        self.id = id
         self.airspace = airspace
         self.moving_time = 0
         self.fly_process = env.process(self.fly())
         env.process(self.check_collision())
         self.airspace.add_drone(self)  # adds itself to the airspace
+
+    def calculate_velocity(self):
+        """
+        Converts scalar speed to vector velocity.
+        :return: Velocity as a list [x,y]
+        """
+        delt_x_sq, delt_y_sq = ((self.end[0] - self.start[0]) ** 2,
+                                (self.end[1] - self.start[1]) ** 2)
+        delt_square_sum = delt_x_sq + delt_y_sq
+
+        if delt_square_sum == 0:
+            raise ValueError("Start and end points cannot be the same")
+
+        vel_x = math.sqrt(((self.speed ** 2) / delt_square_sum) * delt_x_sq)
+        if self.end[0] < self.start[0]:
+            vel_x = -abs(vel_x)
+        vel_y = math.sqrt(((self.speed ** 2) / delt_square_sum) * delt_y_sq)
+        if self.end[1] < self.start[1]:
+            vel_y = -abs(vel_y)
+        velocity = [vel_x, vel_y]
+
+        print(f"Drone {self.id} velocity: {velocity}")
+        return velocity
 
     def finished(self):
         return self.pos == self.end
@@ -45,7 +71,7 @@ class Drone(object):
         Change TIME_STEP for more accurate calculations
         :return:
         """
-        print("drone",self.id,self.env.now)
+        print("drone", self.id, self.env.now)
         while not self.end_point_passed():
             time_to_move = TIME_STEP
             print("time stepping:", self.id)
@@ -60,7 +86,7 @@ class Drone(object):
             self.moving_time += TIME_STEP
             self.pos = (self.start[0] + (self.velocity[0] * self.moving_time),
                         self.start[1] + (self.velocity[1] * self.moving_time))
-            print("Drone",self.id,"pos:",self.pos)
+            print("Drone", self.id, "pos:", self.pos)
         # update drone position
         self.pos = (self.end[0], self.end[1])
         self.airspace.remove_drone(self)
@@ -74,7 +100,7 @@ class Drone(object):
         """
         while True:
             collision = self.airspace.get_time_of_first_collisions(self)
-            print("checking", self.id,"for collision:",collision)
+            print("checking", self.id, "for collision:", collision)
 
             if not collision:
                 yield self.env.timeout(TIME_BETWEEN_CHECKS)
