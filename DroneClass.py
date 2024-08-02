@@ -4,7 +4,7 @@ import simpy
 
 TIME_STEP = 1  # Amount of time passed between each position update (millisecond)
 MAX_SPEED = 10  # Speed in ms-1
-TIME_BETWEEN_CHECKS = 2  # Amount of time passed between checking for collision
+TIME_BETWEEN_CHECKS = 1  # Amount of time passed between checking for collision
 
 
 class Drone(object):
@@ -71,6 +71,7 @@ class Drone(object):
         Change TIME_STEP for more accurate calculations
         :return:
         """
+        yield self.env.timeout(0.5)
         while not self.end_point_passed():
             time_to_move = TIME_STEP
             try:
@@ -96,7 +97,7 @@ class Drone(object):
         """
         while True:
             collision = self.airspace.get_time_of_first_collisions(self)
-            print(f"checking {self.id} for collision:", collision)
+            print(f"checking {self.id} for collision: {collision} at time {self.env.now}")
 
             if not collision:
                 yield self.env.timeout(TIME_BETWEEN_CHECKS)
@@ -108,7 +109,6 @@ class Drone(object):
                 yield self.env.timeout(TIME_BETWEEN_CHECKS)
             else:
                 yield self.env.timeout(time_to_collision)
-                self.fly_process.interrupt()
                 print(f"Interrupting flight {self.id} at {self.pos} at time {self.env.now}")
                 self.fly_process.interrupt()
 
@@ -131,7 +131,3 @@ class Drone(object):
                 self.start[1], self.end[1])):
             return True
         return False
-
-    def permission_to_move(self):
-        # collision resolve
-        pass

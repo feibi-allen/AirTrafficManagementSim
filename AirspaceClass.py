@@ -11,11 +11,11 @@ class Airspace(object):
 
     def add_drone(self, drone):
         self.drones.append(drone)
-        print("drone added:", drone.get_id())
+        #print("drone added:", drone.get_id())
 
     def remove_drone(self, drone):
         self.drones.remove(drone)
-        print("drone removed:", drone.get_id())
+        #print("drone removed:", drone.get_id())
 
     def get_time_of_first_collisions(self, drone):
         # FIXME - split into smaller functions
