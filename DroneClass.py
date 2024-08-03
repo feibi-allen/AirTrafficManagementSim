@@ -19,8 +19,8 @@ class Drone(object):
         self.pos = self.start
         self.airspace = airspace
         self.moving_time = 0
-        self.fly_process = env.process(self.fly())
         env.process(self.check_collision())
+        self.fly_process = env.process(self.fly())
         self.airspace.add_drone(self)  # adds itself to the airspace
 
     def calculate_velocity(self):
@@ -103,7 +103,7 @@ class Drone(object):
                 yield self.env.timeout(TIME_BETWEEN_CHECKS)
                 continue
 
-            time_to_collision = next(iter(collision.values()))
+            time_to_collision = next(iter(collision.values()))-0.5
             print(f"Time to collision = {time_to_collision}")
             if time_to_collision > TIME_BETWEEN_CHECKS:
                 yield self.env.timeout(TIME_BETWEEN_CHECKS)
