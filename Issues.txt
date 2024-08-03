@@ -11,3 +11,5 @@ Drones:
 
 - paths in opposite directions
     - hot to resolve
+
+- if there is a collision very shortly after another this is bad because it won't detect it
