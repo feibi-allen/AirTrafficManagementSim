@@ -1,11 +1,12 @@
 import math
+import threading
 
 import simpy
 
 TIME_STEP = 1  # Amount of time passed between each position update (millisecond)
 MAX_SPEED = 10  # Speed in ms-1
 TIME_BETWEEN_CHECKS = 1  # Amount of time passed between checking for collision
-
+WAIT_TIME = 2 # Amount of time drones wait before checking if they can move again
 
 class Drone(object):
     def __init__(self, env, start, end, speed, id, airspace):
@@ -22,6 +23,8 @@ class Drone(object):
         env.process(self.check_collision())
         self.fly_process = env.process(self.fly())
         self.airspace.add_drone(self)  # adds itself to the airspace
+        self.stationary = False
+        self.condition = threading.Condition()
 
     def calculate_velocity(self):
         """
@@ -82,7 +85,10 @@ class Drone(object):
                 self.start[1] + (self.velocity[1] * self.moving_time))
                 print(f"Time stepping: {self.id} to {self.pos} at time {self.env.now}")
             except simpy.Interrupt:
-                self.check_if_go()
+                # wait for permission to move
+                with self.condition:
+                    while self.stationary:
+                        self.condition.wait()
 
         # update drone position
         self.pos = (self.end[0], self.end[1])
@@ -103,6 +109,7 @@ class Drone(object):
                 yield self.env.timeout(TIME_BETWEEN_CHECKS)
                 continue
 
+            # 0.5 used to synchronise with fly process?
             time_to_collision = next(iter(collision.values()))-0.5
             print(f"Time to collision = {time_to_collision}")
             if time_to_collision > TIME_BETWEEN_CHECKS:
@@ -111,9 +118,17 @@ class Drone(object):
                 yield self.env.timeout(time_to_collision)
                 print(f"Interrupting flight {self.id} at {self.pos} at time {self.env.now}")
                 self.fly_process.interrupt()
+                self.stationary = True
+                self.check_if_go(collision)
+                yield self.env.timeout(TIME_STEP/2) # allows drone to move before checking for another collision
 
-    def check_if_go(self):
-        print("collision resolve,", self.id)
+
+    def check_if_go(self,collision):
+        print("collision resolving,", self.id)
+
+        for drone in collision:
+
+
 
     def end_point_passed(self):
         # check collinearity of start end and current pos
