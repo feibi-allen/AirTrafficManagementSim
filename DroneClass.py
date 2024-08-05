@@ -49,9 +49,6 @@ class Drone(object):
         print(f"Drone {self.id} velocity: {velocity}")
         return velocity
 
-    def finished(self):
-        return self.pos == self.end
-
     def get_velocity(self):
         return self.velocity
 
@@ -125,8 +122,7 @@ class Drone(object):
 
     def check_if_go(self,collision):
         print("collision resolving,", self.id)
-
-        for drone in collision:
+        pass
 
 
 
