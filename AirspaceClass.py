@@ -73,6 +73,17 @@ class Airspace(object):
         return None
 
     def calculate_collision_time(self, a, b, c, drone, other_drone):
+        """
+        Does quadratic calculation of distance between drones to find the time
+        the drones are within minimum distance of each-other
+        :param a: (delta_x_vel ** 2) + (delta_y_vel ** 2)
+        :param b: 2 * (delta_x * delta_x_vel + delta_y * delta_y_vel)
+        :param c: delta_x ** 2) + (delta_y ** 2) - (self.MINIMUM_DISTANCE ** 2)
+        :param drone:
+        :param other_drone:
+        :return: first time the drones are within minimum distance of
+        each-other if there is one
+        """
         if a == 0:
             return None
         if (b ** 2) == 4 * a * c:
@@ -113,6 +124,10 @@ class Airspace(object):
 
     @staticmethod
     def _time_to_arrival(drone):
+        """
+        :param drone:
+        :return: the time it will take for the drone to reach its end point
+        """
         c_pos_x, c_pos_y = drone.get_position()[0], drone.get_position()[1]
         e_pos_x, e_pos_y = drone.get_end()[0], drone.get_end()[1]
         v_x, v_y = drone.get_velocity()[0], drone.get_velocity()[1]
