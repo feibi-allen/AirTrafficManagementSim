@@ -3,7 +3,7 @@ import math
 
 MINIMUM_DISTANCE = 1 # closest drones can get to each-other
 BUFFER_TIME = 1 # time before reaching minimum distance that drones stop
-TIME_BETWEEN_CALCULATION = 1
+TIME_BETWEEN_CALCULATIONS = 1 # time between each collision calculation
 
 class Airspace(object):
 
@@ -11,19 +11,27 @@ class Airspace(object):
         self.stationary_drones = {} # drone:position?
         self.moving_drones = []
         self.collision = None # head of linked list
+        self.env = env
         self.check_collsions_process = env.process(self.run_airspace())
 
 
     def add_drone(self, drone):
         self.stationary_drones.append(drone)
-        #print("drone added:", drone.get_id())
 
     def remove_drone(self, drone):
         self.stationary_drones.remove(drone)
-        #print("drone removed:", drone.get_id())
+
 
     def run_airspace(self):
-        yeild
+        """
+        synchronise the airspace
+        :return:
+        """
+        #set all drones to go
+        while True: # FIXME - change to while some drone not finished
+            self.collision = self.get_time_of_first_collisions()
+            yield self.env.timeout(TIME_BETWEEN_CALCULATIONS)
+
 
     def get_time_of_first_collisions(self, drone):
         # FIXME - split into smaller functions
