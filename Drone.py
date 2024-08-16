@@ -1,4 +1,3 @@
-import simpy
 import math
 
 class Drone:
