@@ -2,7 +2,7 @@ import simpy
 import math
 
 class Drone:
-    def __init__(self,env,speed,start,end):
+    def __init__(self,speed,start,end):
         # FIXME - error checking for speed and pos correct structure
         self.pos = start
         self.start = start
