@@ -1,26 +1,26 @@
 import simpy
 import math
+import CollisionDependency
+import Drone
 
-MINIMUM_DISTANCE = 1 # closest drones can get to each-other
-BUFFER_TIME = 1 # time before reaching minimum distance that drones stop
-TIME_BETWEEN_CALCULATIONS = 1 # time between each collision calculation
+MINIMUM_DISTANCE = 1  # closest drones can get to each-other
+BUFFER_TIME = 1  # time before reaching minimum distance that drones stop
+TIME_BETWEEN_CALCULATIONS = 1  # time between each collision calculation
+
 
 class Airspace(object):
 
-    def __init__(self,env):
-        self.stationary_drones = {} # drone:position?
-        self.moving_drones = []
-        self.collision = None # head of linked list
+    def __init__(self, env):
+        self.drones = []
+        self.next_collision = None
         self.env = env
-        self.check_collsions_process = env.process(self.run_airspace())
-
+        self.check_collisions_process = env.process(self.run_airspace())
 
     def add_drone(self, drone):
-        self.stationary_drones.append(drone)
+        self.drones.append(drone)
 
     def remove_drone(self, drone):
-        self.stationary_drones.remove(drone)
-
+        self.drones.remove(drone)
 
     def run_airspace(self):
         """
@@ -28,12 +28,11 @@ class Airspace(object):
         :return:
         """
         #set all drones to go
-        while True: # FIXME - change to while some drone not finished
-            self.collision = self.get_time_of_first_collisions()
+        while True:  # FIXME - change to while some drone not finished
+            self.get_time_of_first_collision()
             yield self.env.timeout(TIME_BETWEEN_CALCULATIONS)
 
-
-    def get_time_of_first_collisions(self, drone):
+    def get_time_of_first_collision(self):
         # FIXME - split into smaller functions
         """
         Calculates times (from drones current position) to which safety
@@ -44,49 +43,41 @@ class Airspace(object):
         :param drone: asking drone
         :return: dict of first upcoming collision (drone colliding with, time)
         """
-        collision_times = {}
-        # assign variables
-        pos_x, pos_y = drone.get_position()[0], drone.get_position()[1]
-        #print("d1 pos:", pos_x, pos_y)
-        x_vel, y_vel = drone.get_velocity()[0], drone.get_velocity()[1]
-        #print("d1 vels:", x_vel, y_vel)
-        # don't check itself
-        for other_drone in [d for d in self.drones if d != drone]:
-            # assign variables
-            other_pos_x, other_pos_y = other_drone.get_position()[0], \
-                other_drone.get_position()[1]
-            #print("d2 pos:", other_pos_x, other_pos_y)
-            other_x_vel, other_y_vel = other_drone.get_velocity()[0], \
-                other_drone.get_velocity()[1]
-            #print("d2 vels:", other_x_vel, other_y_vel)
+        collision_time = None #FIXME - decide what datastruct to use
 
-            # maths variables
-            delta_x = other_pos_x - pos_x
-            #print("delt x:", delta_x)
-            delta_x_vel = other_x_vel - x_vel
-            #print("delt x vel:", delta_x_vel)
-            delta_y = other_pos_y - pos_y
-            #print("delt y:", delta_y)
-            delta_y_vel = other_y_vel - y_vel
-            #print("delt y vel:", delta_y_vel)
+        for drone in self.drones:
+            pos_x, pos_y = drone.get_position()[0], drone.get_position()[1]
+            x_vel, y_vel = drone.get_velocity()[0], drone.get_velocity()[1]
 
-            a = (delta_x_vel ** 2) + (delta_y_vel ** 2)
-            b = 2 * (delta_x * delta_x_vel + delta_y * delta_y_vel)
-            c = (delta_x ** 2) + (delta_y ** 2) - (self.MINIMUM_DISTANCE ** 2)
-            #print("a:", a, "b:", b, "c:", c)
+            for other_drone in [d for d in self.drones if d != drone]:
+                # primary variables
+                other_pos_x, other_pos_y = other_drone.get_position()[0], \
+                    other_drone.get_position()[1]
 
-            # maths equations
-            time_of_collision = self.calculate_collision_time(a,b,c,drone,other_drone)
-            if time_of_collision is not None:
-                collision_times[other_drone] = time_of_collision
+                other_x_vel, other_y_vel = other_drone.get_velocity()[0], \
+                    other_drone.get_velocity()[1]
 
-        #print(collision_times)
-        if len(collision_times) > 0:
-            time_of_first_collision = min(
-                [val for val in collision_times.values()])
-            return {key: val for key, val in collision_times.items() if
-                    val == time_of_first_collision}
-        return None
+                # secondary variables
+                delta_x = other_pos_x - pos_x
+                delta_x_vel = other_x_vel - x_vel
+                delta_y = other_pos_y - pos_y
+                delta_y_vel = other_y_vel - y_vel
+
+                # quadratic variables
+                a = (delta_x_vel ** 2) + (delta_y_vel ** 2)
+                b = 2 * (delta_x * delta_x_vel + delta_y * delta_y_vel)
+                c = (delta_x ** 2) + (delta_y ** 2) - (MINIMUM_DISTANCE ** 2)
+
+                # maths equations
+                time_of_collision = self.calculate_collision_time(a, b, c,drone,other_drone)
+
+                if time_of_collision is not None:
+                    if collision_time is None:
+                        collision_time = (time_of_collision,[drone,other_drone])
+                        #FIXME - check for double entries
+                    elif time_of_collision<collision_time[0]:
+                        collision_time = (time_of_collision,[drone,other_drone])
+            self.next_collision = collision_time
 
     def calculate_collision_time(self, a, b, c, drone, other_drone):
         """
