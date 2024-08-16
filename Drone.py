@@ -3,7 +3,7 @@ import math
 
 class Drone:
     def __init__(self,env,speed,start,end):
-        # FIXME - error checking for speed correct variables
+        # FIXME - error checking for speed and pos correct structure
         self.pos = start
         self.start = start
         self.end = end
@@ -43,6 +43,9 @@ class Drone:
 
     def get_end(self):
         return self.end
+
+    def get_speed(self):
+        return self.max_speed
 
     def get_velocity(self):
         return self.current_velocity

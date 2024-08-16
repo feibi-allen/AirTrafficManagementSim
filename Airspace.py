@@ -27,21 +27,45 @@ class Airspace(object):
         synchronise the airspace
         :return:
         """
-        #set all drones to go
         while True:  # FIXME - change to while some drone not finished
-            self.get_time_of_first_collision()
+            for drone in self.drones:
+                # FIXME - check if in correct vertical position first
+                # FIXME - check if starting position is too close
+                drone.go_horizontal()
+
+            self.get_time_of_next_collision()
+
+            imminent_collision = True
+            while imminent_collision:
+                if self.next_collision is not None:
+                    if self.next_collision <= TIME_BETWEEN_CALCULATIONS:
+                        # faster drone will be one overtaking so must give way
+                        self.get_faster_drone().stop()
+
+                self.get_time_of_next_collision()
+                if self.next_collision is None or self.next_collision > TIME_BETWEEN_CALCULATIONS:
+                    imminent_collision = False
+
             yield self.env.timeout(TIME_BETWEEN_CALCULATIONS)
 
-    def get_time_of_first_collision(self):
+            for drone in self.drones:
+                drone.move()
+
+    def get_faster_drone(self):
+        drone1,drone2 = self.next_collision[1][0],self.next_collision[1][2]
+        print(f"drone1:{drone1}, drone2:{drone2}")
+        if drone1.get_speed() >= drone2.get_speed():
+            return drone1
+        return drone2
+
+    def get_time_of_next_collision(self):
         # FIXME - split into smaller functions
         """
-        Calculates times (from drones current position) to which safety
+        Calculates time (from drones current position) to which safety
         circumference around the drones will intersect based on position
-        and velocity. Since calculations are only made when both drones are
-        moving time is the same for both.
-        (quadratic of distance between drones against time)
-        :param drone: asking drone
-        :return: dict of first upcoming collision (drone colliding with, time)
+        and velocity. (quadratic of distance between drones against time)
+        Sets self.next_collision to the smallest time and drones involved.
+        (time,[drone,other_drone]) else if no collision: None
         """
         collision_time = None #FIXME - decide what datastruct to use
 
@@ -77,6 +101,7 @@ class Airspace(object):
                         #FIXME - check for double entries
                     elif time_of_collision<collision_time[0]:
                         collision_time = (time_of_collision,[drone,other_drone])
+
             self.next_collision = collision_time
 
     def calculate_collision_time(self, a, b, c, drone, other_drone):
