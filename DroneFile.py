@@ -30,7 +30,6 @@ class Drone:
             vel_y = -abs(vel_y)
         velocity = [vel_x, vel_y,0]
 
-        print(f"Drone {self.id} velocity: {velocity}")
         return velocity
 
     def move(self,time):
@@ -42,6 +41,9 @@ class Drone:
 
     def get_end(self):
         return self.end
+
+    def get_position(self):
+        return  self.pos
 
     def get_speed(self):
         return self.max_speed

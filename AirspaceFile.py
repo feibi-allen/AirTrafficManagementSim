@@ -1,7 +1,6 @@
 import simpy
 import math
-import CollisionDependency
-import Drone
+import DroneFile
 
 MINIMUM_DISTANCE = 1  # closest drones can get to each-other
 BUFFER_TIME = 1  # time before reaching minimum distance that drones stop
