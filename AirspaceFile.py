@@ -1,6 +1,6 @@
 import simpy
 import math
-import DroneFile
+from DroneFile import Drone
 
 MINIMUM_DISTANCE = 1  # closest drones can get to each-other
 BUFFER_TIME = 1  # time before reaching minimum distance that drones stop
@@ -51,14 +51,13 @@ class Airspace(object):
                 drone.move()
 
     def get_faster_drone(self):
-        drone1,drone2 = self.next_collision[1][0],self.next_collision[1][2]
+        drone1, drone2 = self.next_collision[1][0], self.next_collision[1][2]
         print(f"drone1:{drone1}, drone2:{drone2}")
         if drone1.get_speed() >= drone2.get_speed():
             return drone1
         return drone2
 
     def get_time_of_next_collision(self):
-        # FIXME - split into smaller functions
         """
         Calculates time (from drones current position) to which safety
         circumference around the drones will intersect based on position
@@ -66,11 +65,20 @@ class Airspace(object):
         Sets self.next_collision to the smallest time and drones involved.
         (time,[drone,other_drone]) else if no collision: None
         """
-        collision_time = None #FIXME - decide what datastruct to use
+        collision_time = None
 
+        # can be optimised to check pairs only,
+        # not all other drones for each drone
         for drone in self.drones:
             pos_x, pos_y = drone.get_position()[0], drone.get_position()[1]
             x_vel, y_vel = drone.get_velocity()[0], drone.get_velocity()[1]
+
+            # FIXME
+            # If Drone is moving vertically don't check it for collision with
+            # other drones, it will reserve the column and other drones will
+            # check to see if they will fly into the column and avoid
+            if x_vel==0 and y_vel==0:
+                continue
 
             for other_drone in [d for d in self.drones if d != drone]:
                 # primary variables
@@ -92,14 +100,17 @@ class Airspace(object):
                 c = (delta_x ** 2) + (delta_y ** 2) - (MINIMUM_DISTANCE ** 2)
 
                 # maths equations
-                time_of_collision = self.calculate_collision_time(a, b, c,drone,other_drone)
+                time_of_collision = self.calculate_collision_time(a, b, c,
+                                                                  drone,
+                                                                  other_drone)
 
                 if time_of_collision is not None:
                     if collision_time is None:
-                        collision_time = (time_of_collision,[drone,other_drone])
-                        #FIXME - check for double entries
-                    elif time_of_collision<collision_time[0]:
-                        collision_time = (time_of_collision,[drone,other_drone])
+                        collision_time = (
+                        time_of_collision, [drone, other_drone])
+                    elif time_of_collision < collision_time[0]:
+                        collision_time = (
+                        time_of_collision, [drone, other_drone])
 
             self.next_collision = collision_time
 
