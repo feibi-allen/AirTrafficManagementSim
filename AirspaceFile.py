@@ -16,6 +16,7 @@ class Airspace(object):
         self.check_collisions_process = env.process(self.run_airspace())
 
     def add_drone(self, drone):
+        # FIXME - check for not occupying same column or being too close
         self.drones.append(drone)
 
     def remove_drone(self, drone):
@@ -28,7 +29,9 @@ class Airspace(object):
         """
         while True:  # FIXME - change to while some drone not finished
             for drone in self.drones:
-                # FIXME - check if in correct vertical position first
+                # FIXME - check if in correct vertical position first,
+                # FIXME - create method for checking if drones have reached,
+                # correct vertical position and snapping to it if reached
                 # FIXME - check if starting position is too close
                 drone.go_horizontal()
 
@@ -50,9 +53,31 @@ class Airspace(object):
             for drone in self.drones:
                 drone.move()
 
-    def get_faster_drone(self):
+    def set_drone_velocities(self):
+        for drone in self.drones:
+            target_h = self.get_required_drone_height(drone)
+            if drone.get_position()[2] != target_h:
+                drone.go_vertical()
+            else:
+                drone.go_horizontal()
+
+
+    @staticmethod
+    def get_required_drone_height(drone):
+        delta_x = drone.get_end()[0] - drone.get_start()[0]
+        delta_y = drone.get_end()[1] - drone.get_start()[1]
+        if delta_x >= 0 and delta_y > 0:
+            return 2 * MINIMUM_DISTANCE
+        if delta_x > 0 and delta_y <= 0:
+            return 4 * MINIMUM_DISTANCE
+        if delta_x <=0 and delta_y < 0:
+            return 6 * MINIMUM_DISTANCE
+        if delta_x > 0 and delta_y >= 0:
+            return 8 * MINIMUM_DISTANCE
+
+
+def get_faster_drone(self):
         drone1, drone2 = self.next_collision[1][0], self.next_collision[1][2]
-        print(f"drone1:{drone1}, drone2:{drone2}")
         if drone1.get_speed() >= drone2.get_speed():
             return drone1
         return drone2
@@ -73,44 +98,50 @@ class Airspace(object):
             pos_x, pos_y = drone.get_position()[0], drone.get_position()[1]
             x_vel, y_vel = drone.get_velocity()[0], drone.get_velocity()[1]
 
-            # FIXME
-            # If Drone is moving vertically don't check it for collision with
-            # other drones, it will reserve the column and other drones will
-            # check to see if they will fly into the column and avoid
-            if x_vel==0 and y_vel==0:
+            # helps to reduce number of checks by not iterating for drones
+            # that are not moving horizontally
+            if x_vel == 0 and y_vel == 0:
                 continue
 
             for other_drone in [d for d in self.drones if d != drone]:
-                # primary variables
-                other_pos_x, other_pos_y = other_drone.get_position()[0], \
-                    other_drone.get_position()[1]
 
-                other_x_vel, other_y_vel = other_drone.get_velocity()[0], \
-                    other_drone.get_velocity()[1]
+                # only check for collision if they are on the same height or
+                # if the other drone is moving vertically so drones flying
+                # close to each-other on different levels don't count as a
+                # collision
+                if other_drone.get_position()[2] == drone.get_position()[2] or\
+                        other_drone.get_velocity()[2] != 0:
+                    # primary variables
+                    other_pos_x, other_pos_y = other_drone.get_position()[0], \
+                        other_drone.get_position()[1]
 
-                # secondary variables
-                delta_x = other_pos_x - pos_x
-                delta_x_vel = other_x_vel - x_vel
-                delta_y = other_pos_y - pos_y
-                delta_y_vel = other_y_vel - y_vel
+                    other_x_vel, other_y_vel = other_drone.get_velocity()[0], \
+                        other_drone.get_velocity()[1]
 
-                # quadratic variables
-                a = (delta_x_vel ** 2) + (delta_y_vel ** 2)
-                b = 2 * (delta_x * delta_x_vel + delta_y * delta_y_vel)
-                c = (delta_x ** 2) + (delta_y ** 2) - (MINIMUM_DISTANCE ** 2)
+                    # secondary variables
+                    delta_x = other_pos_x - pos_x
+                    delta_x_vel = other_x_vel - x_vel
+                    delta_y = other_pos_y - pos_y
+                    delta_y_vel = other_y_vel - y_vel
 
-                # maths equations
-                time_of_collision = self.calculate_collision_time(a, b, c,
-                                                                  drone,
-                                                                  other_drone)
+                    # quadratic variables
+                    a = (delta_x_vel ** 2) + (delta_y_vel ** 2)
+                    b = 2 * (delta_x * delta_x_vel + delta_y * delta_y_vel)
+                    c = (delta_x ** 2) + (delta_y ** 2) - (
+                            MINIMUM_DISTANCE ** 2)
 
-                if time_of_collision is not None:
-                    if collision_time is None:
-                        collision_time = (
-                        time_of_collision, [drone, other_drone])
-                    elif time_of_collision < collision_time[0]:
-                        collision_time = (
-                        time_of_collision, [drone, other_drone])
+                    # maths equations
+                    time_of_collision = self.calculate_collision_time(a, b, c,
+                                                                      drone,
+                                                                      other_drone)
+
+                    if time_of_collision is not None:
+                        if collision_time is None:
+                            collision_time = (
+                                time_of_collision, [drone, other_drone])
+                        elif time_of_collision < collision_time[0]:
+                            collision_time = (
+                                time_of_collision, [drone, other_drone])
 
             self.next_collision = collision_time
 
@@ -140,11 +171,10 @@ class Airspace(object):
                     2 * a)
             time_of_collision_2 = (-b - math.sqrt((b ** 2) - 4 * a * c)) / (
                     2 * a)
-            # print("points of collisions", time_of_collision_1, time_of_collision_2)
-            # print("first point of contact:", min(time_of_collision_2, time_of_collision_1))
+
             if self._in_range(drone, other_drone,
                               min(time_of_collision_2, time_of_collision_1)):
-                # print("t min within range")
+
                 return min(time_of_collision_2, time_of_collision_1)
         return None
 
