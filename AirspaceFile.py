@@ -80,11 +80,11 @@ class Airspace(object):
             return 8 * MINIMUM_DISTANCE
 
 
-def get_faster_drone(self):
-        drone1, drone2 = self.next_collision[1][0], self.next_collision[1][2]
-        if drone1.get_speed() >= drone2.get_speed():
-            return drone1
-        return drone2
+    def get_faster_drone(self):
+            drone1, drone2 = self.next_collision[1][0], self.next_collision[1][2]
+            if drone1.get_speed() >= drone2.get_speed():
+                return drone1
+            return drone2
 
     def get_time_of_next_collision(self):
         """
