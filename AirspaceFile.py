@@ -27,16 +27,12 @@ class Airspace(object):
         synchronise the airspace
         :return:
         """
-        while True:  # FIXME - change to while some drone not finished
-            for drone in self.drones:
-                # FIXME - check if in correct vertical position first,
-                # FIXME - create method for checking if drones have reached,
-                # correct vertical position and snapping to it if reached
-                # FIXME - check if starting position is too close
-                drone.go_horizontal()
+        while self.drones:
+            self.set_drone_velocities()
 
             self.get_time_of_next_collision()
 
+            # can be simplified to skip while loop if there is no collision
             imminent_collision = True
             while imminent_collision:
                 if self.next_collision is not None:
@@ -64,6 +60,14 @@ class Airspace(object):
 
     @staticmethod
     def get_required_drone_height(drone):
+        """
+        Returns height that the drone should fly at depending on heading,
+        0-89, 90-179, 180-269, 270-359. x * minimum distance ensures that even
+        if drones fly in a column they will not get within minimum distance of
+        each-other
+        :param drone:
+        :return:
+        """
         delta_x = drone.get_end()[0] - drone.get_start()[0]
         delta_y = drone.get_end()[1] - drone.get_start()[1]
         if delta_x >= 0 and delta_y > 0:
