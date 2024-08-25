@@ -21,6 +21,7 @@ class Airspace(object):
 
     def remove_drone(self, drone):
         self.drones.remove(drone)
+        print(f"{drone},removed")
 
     def run_airspace(self):
         """
@@ -60,8 +61,8 @@ class Airspace(object):
 
     def set_drone_target_height(self):
         for drone in self.drones:
-            x_pos,y_pos = drone.get_position()[0],drone.get_position()[1]
-            end_x,end_y = drone.get_end()[0],drone.get_end()[1]
+            x_pos, y_pos = drone.get_position()[0], drone.get_position()[1]
+            end_x, end_y = drone.get_end()[0], drone.get_end()[1]
             # fly at protocol height unless end column is reached, then target
             # height is set to end pos so drone will move toward end pos
             if x_pos == end_x and y_pos == end_y:
@@ -85,17 +86,16 @@ class Airspace(object):
             return 2 * MINIMUM_DISTANCE
         if delta_x > 0 and delta_y <= 0:
             return 4 * MINIMUM_DISTANCE
-        if delta_x <=0 and delta_y < 0:
+        if delta_x <= 0 and delta_y < 0:
             return 6 * MINIMUM_DISTANCE
         if delta_x > 0 and delta_y >= 0:
             return 8 * MINIMUM_DISTANCE
 
-
     def get_faster_drone(self):
-            drone1, drone2 = self.next_collision[1][0], self.next_collision[1][2]
-            if drone1.get_speed() >= drone2.get_speed():
-                return drone1
-            return drone2
+        drone1, drone2 = self.next_collision[1][0], self.next_collision[1][2]
+        if drone1.get_speed() >= drone2.get_speed():
+            return drone1
+        return drone2
 
     def get_time_of_next_collision(self):
         """
@@ -124,7 +124,7 @@ class Airspace(object):
                 # if the other drone is moving vertically so drones flying
                 # close to each-other on different levels don't count as a
                 # collision
-                if other_drone.get_position()[2] == drone.get_position()[2] or\
+                if other_drone.get_position()[2] == drone.get_position()[2] or \
                         other_drone.get_velocity()[2] != 0:
                     # primary variables
                     other_pos_x, other_pos_y = other_drone.get_position()[0], \
@@ -189,7 +189,6 @@ class Airspace(object):
 
             if self._in_range(drone, other_drone,
                               min(time_of_collision_2, time_of_collision_1)):
-
                 return min(time_of_collision_2, time_of_collision_1)
         return None
 
