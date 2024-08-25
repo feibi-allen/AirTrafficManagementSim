@@ -34,7 +34,7 @@ class Airspace(object):
 
             self.get_time_of_next_collision()
 
-            ## can be simplified to skip while loop if there is no collision
+            # can be simplified to skip while loop if there is no collision
             imminent_collision = True
             while imminent_collision:
                 if self.next_collision is not None:
@@ -43,7 +43,8 @@ class Airspace(object):
                         self.get_faster_drone().stop()
 
                 self.get_time_of_next_collision()
-                if self.next_collision is None or self.next_collision > TIME_BETWEEN_CALCULATIONS:
+                if self.next_collision is None or \
+                        self.next_collision > TIME_BETWEEN_CALCULATIONS:
                     imminent_collision = False
 
             yield self.env.timeout(TIME_BETWEEN_CALCULATIONS)
@@ -124,14 +125,14 @@ class Airspace(object):
                 # if the other drone is moving vertically so drones flying
                 # close to each-other on different levels don't count as a
                 # collision
-                if other_drone.get_position()[2] == drone.get_position()[2] or \
-                        other_drone.get_velocity()[2] != 0:
+                if other_drone.get_position()[2] == drone.get_position()[2] \
+                       or other_drone.get_velocity()[2] != 0:
                     # primary variables
-                    other_pos_x, other_pos_y = other_drone.get_position()[0], \
-                        other_drone.get_position()[1]
+                    other_pos_x = other_drone.get_position()[0]
+                    other_pos_y = other_drone.get_position()[1]
 
-                    other_x_vel, other_y_vel = other_drone.get_velocity()[0], \
-                        other_drone.get_velocity()[1]
+                    other_x_vel = other_drone.get_velocity()[0]
+                    other_y_vel = other_drone.get_velocity()[1]
 
                     # secondary variables
                     delta_x = other_pos_x - pos_x
@@ -146,9 +147,9 @@ class Airspace(object):
                             MINIMUM_DISTANCE ** 2)
 
                     # maths equations
-                    time_of_collision = self.calculate_collision_time(a, b, c,
-                                                                      drone,
-                                                                      other_drone)
+                    time_of_collision = \
+                        self.calculate_collision_time(a, b, c,
+                                                      drone, other_drone)
 
                     if time_of_collision is not None:
                         if collision_time is None:
