@@ -24,15 +24,16 @@ class Airspace(object):
 
     def run_airspace(self):
         """
-        synchronise the airspace
+        synchronise and runs the airspace
         :return:
         """
         while self.drones:
+            self.set_drone_target_height()
             self.set_drone_velocities()
 
             self.get_time_of_next_collision()
 
-            # can be simplified to skip while loop if there is no collision
+            ## can be simplified to skip while loop if there is no collision
             imminent_collision = True
             while imminent_collision:
                 if self.next_collision is not None:
@@ -47,16 +48,26 @@ class Airspace(object):
             yield self.env.timeout(TIME_BETWEEN_CALCULATIONS)
 
             for drone in self.drones:
+                # logic handled in drone to reduce load on airspace
                 drone.move()
 
     def set_drone_velocities(self):
         for drone in self.drones:
-            target_h = self.get_required_drone_height(drone)
-            if drone.get_position()[2] != target_h:
+            if drone.get_position()[2] != drone.get_target_height():
                 drone.go_vertical()
             else:
                 drone.go_horizontal()
 
+    def set_drone_target_height(self):
+        for drone in self.drones:
+            x_pos,y_pos = drone.get_position()[0],drone.get_position()[1]
+            end_x,end_y = drone.get_end()[0],drone.get_end()[1]
+            # fly at protocol height unless end column is reached, then target
+            # height is set to end pos so drone will move toward end pos
+            if x_pos == end_x and y_pos == end_y:
+                drone.set_target_height(drone.get_end()[2])
+            else:
+                drone.set_target_height(self.get_required_drone_height(drone))
 
     @staticmethod
     def get_required_drone_height(drone):

@@ -6,6 +6,7 @@ class Drone:
         self.pos = start
         self.start = start
         self.end = end
+        self.target_height = start[2]
         self.max_speed = speed # maximum speed
         self.max_h_velocity = self._calculate_horizontal_velocity()
         self.current_velocity = [0,0,0]
@@ -32,10 +33,6 @@ class Drone:
 
         return velocity
 
-    def move(self,time):
-        self.pos[0] += self.current_velocity[0] * time
-        self.pos[0] += self.current_velocity[0] * time
-
     def get_start(self):
         return self.start
 
@@ -44,6 +41,12 @@ class Drone:
 
     def get_position(self):
         return  self.pos
+
+    def set_target_height(self,height):
+        self.target_height = height
+
+    def get_target_height(self):
+        return self.target_height
 
     def get_speed(self):
         return self.max_speed
@@ -60,6 +63,12 @@ class Drone:
 
     def stop(self):
         self.current_velocity = [0,0,0]
+
+    def move(self,time):
+        #FIXME - check if it will move past there it is meant to be
+        self.pos[0] += self.current_velocity[0] * time
+        self.pos[1] += self.current_velocity[1] * time
+        self.pos[2] += self.current_velocity[2] * time
 
     def has_arrived(self):
         # FIXME - write it
