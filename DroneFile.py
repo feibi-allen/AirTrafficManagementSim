@@ -13,7 +13,7 @@ class Drone:
         self.max_h_velocity = self._calculate_horizontal_velocity()
         self.current_velocity = [0, 0, 0]
         self.airspace = airspace
-        airspace.add_drone(self)
+        #airspace.add_drone(self)
 
     def _calculate_horizontal_velocity(self):
         """
@@ -71,7 +71,6 @@ class Drone:
         self.current_velocity = [0, 0, 0]
 
     def move(self, time):
-        # FIXME - check if it will move past there it is meant to be
         if self.current_velocity[2] != 0:
             z_change = self.current_velocity[2] * time
             if self.end_between(self.pos[2], z_change, self.end[2]):
