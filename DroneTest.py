@@ -5,9 +5,6 @@ from DroneFile import Drone
 # commented out airspace references in drone file for testing
 class DroneTest(unittest.TestCase):
 
-    def setup(self):
-        self.drone1 = Drone(speed=5, start=[0, 0, 0], end=[10, 0, 2],airspace="a")
-
     def test_param_number_checks(self):
         self.assertRaises(TypeError,Drone)
         with self.assertRaises(TypeError):
@@ -48,4 +45,6 @@ class DroneTest(unittest.TestCase):
         self.assertEqual(str(context.exception),
                          "Start and end points cannot be the same")
 
-    def test_calculate_vel(self):
+    def test_calculate_h_vel(self):
+        drone1 = Drone(speed=2,start=[0,0,0],end=[10,0,2],airspace="a")
+        self.assertEqual(drone1.max_h_velocity,[2,0,0])
