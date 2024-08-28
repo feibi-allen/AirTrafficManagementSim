@@ -37,4 +37,9 @@ class DroneTest(unittest.TestCase):
 
         with self.assertRaises(TypeError) as context:
             Drone(1, ["a", 2, 3], [1, 2, 4], "a")
-        self.assertEqual(str(context.exception),"[x,y,z] must be numeric")
+        self.assertEqual(str(context.exception),
+                         "[x,y,z] must be numeric")
+
+        with self.assertRaises(ValueError) as context:
+            Drone(1, [1, 2, 3], [1, 2, 3], "a")
+        self.assertEqual(str(context.exception),"Start and end points cannot be the same")
