@@ -58,6 +58,12 @@ class Drone:
 
         return velocity
 
+    @staticmethod
+    def _end_between(upper, lower, end):
+        if upper < end < lower or upper > end > lower:
+            return True
+        return False
+
     def get_start(self):
         return self.start
 
@@ -91,39 +97,43 @@ class Drone:
 
     def move(self, time):
         if self.current_velocity[2] != 0:
-            z_change = self.current_velocity[2] * time
-            if self.end_between(self.pos[2], z_change, self.end[2]):
-                self.pos[2] = self.end[2]
-            else:
-                self.pos[2] += z_change
-
+            self._move_vertical(time)
         elif self.pos[0] != self.end[0] and self.pos[1] != self.end[1]:
-            x_change = self.current_velocity[0] * time
-            y_change = self.current_velocity[0] * time
-            if self.end_between(self.pos[0], x_change, self.end[0]) and \
-                    self.end_between(self.pos[1], y_change, self.end[1]):
-                self.pos[0] = self.end[0]
-                self.pos[1] = self.end[1]
-            # if drone will move past x or y but not both path is incorrectly
-            # calculated and should raise error
-            elif self.end_between(self.pos[0], x_change, self.end[0]) or \
-                    self.end_between(self.pos[1], y_change, self.end[1]):
-                raise ArithmeticError("Drone path incorrectly followed, end "
-                                      "between x or y but not both")
-            else:
-                self.pos[0] += self.current_velocity[0] * time
-                self.pos[1] += self.current_velocity[0] * time
+            self._move_horizontal(time)
+
         # if drone has reached x or y but not both path is incorrectly
         # calculated and should raise error
         else:
             raise ArithmeticError("Drone path incorrectly followed, end at x "
                                   "or y but not both")
+
         if self.pos == self.end:
             print(f"{self},end reached")
             self.airspace.remove_drone(self)
 
-    @staticmethod
-    def end_between(upper, lower, end):
-        if upper < end < lower or upper > end > lower:
-            return True
-        return False
+    def _move_horizontal(self, time):
+        x_change = self.current_velocity[0] * time
+        y_change = self.current_velocity[0] * time
+
+        if self._end_between(self.pos[0], x_change, self.end[0]) and \
+                self._end_between(self.pos[1], y_change, self.end[1]):
+            self.pos[0] = self.end[0]
+            self.pos[1] = self.end[1]
+
+        # if drone will move past x or y but not both path is incorrectly
+        # calculated and should raise error
+        elif self._end_between(self.pos[0], x_change, self.end[0]) or \
+                self._end_between(self.pos[1], y_change, self.end[1]):
+            raise ArithmeticError("Drone path incorrectly followed, end "
+                                  "between x or y but not both")
+
+        else:
+            self.pos[0] += self.current_velocity[0] * time
+            self.pos[1] += self.current_velocity[0] * time
+
+    def _move_vertical(self, time):
+        z_change = self.current_velocity[2] * time
+        if self._end_between(self.pos[2], z_change, self.end[2]):
+            self.pos[2] = self.end[2]
+        else:
+            self.pos[2] += z_change
