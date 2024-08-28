@@ -1,10 +1,19 @@
 import math
-from AirspaceFile import Airspace
+# from AirspaceFile import Airspace
 
 
 class Drone:
     def __init__(self, speed, start, end, airspace):
         # FIXME - error checking for speed and pos correct structure
+        # check for correct params
+        if not isinstance(speed,(int,float)):
+            raise TypeError("Speed must be numeric")
+        self._check_coord(start)
+        self._check_coord(end)
+        if start == end:
+            raise ValueError("Start and end points cannot be the same")
+
+        # assign attributes
         self.pos = start
         self.start = start
         self.end = end
@@ -14,6 +23,16 @@ class Drone:
         self.current_velocity = [0, 0, 0]
         self.airspace = airspace
         #airspace.add_drone(self)
+
+    @staticmethod
+    def _check_coord(param):
+        if not (type(param) is list):
+            raise TypeError("Start and end must be in form [x,y,z]")
+        if len(param) != 3:
+            raise TypeError("Start and end must be in form [x,y,z]")
+        for i in param:
+            if not isinstance(i,(int,float)):
+                raise TypeError("[x,y,z] must be numeric")
 
     def _calculate_horizontal_velocity(self):
         """
@@ -25,7 +44,7 @@ class Drone:
         delt_square_sum = delt_x_sq + delt_y_sq
 
         if delt_square_sum == 0:
-            raise ValueError("Start and end points cannot be the same")
+            return [0,0,0]
 
         vel_x = math.sqrt(
             ((self.max_speed ** 2) / delt_square_sum) * delt_x_sq)
