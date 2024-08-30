@@ -1,12 +1,14 @@
 import unittest
+import math
 from DroneFile import Drone
+
 
 # written to be tested without real airspace,
 # commented out airspace references in drone file for testing
 class DroneTest(unittest.TestCase):
 
     def test_param_number_checks(self):
-        self.assertRaises(TypeError,Drone)
+        self.assertRaises(TypeError, Drone)
         with self.assertRaises(TypeError):
             Drone(1)
         with self.assertRaises(TypeError):
@@ -14,7 +16,7 @@ class DroneTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             Drone(1, [1, 2, 3], [1, 2, 4])
         with self.assertRaises(TypeError):
-            Drone(1, [1, 2, 3], [1, 2, 4], "a","a")
+            Drone(1, [1, 2, 3], [1, 2, 4], "a", "a")
 
     def test_param_value_checks(self):
         with self.assertRaises(TypeError):
@@ -31,7 +33,7 @@ class DroneTest(unittest.TestCase):
                          "Start and end must be in form [x,y,z]")
 
         with self.assertRaises(TypeError) as context:
-            Drone(1, [1,2, 3], "[1, 2, 4]", "a")
+            Drone(1, [1, 2, 3], "[1, 2, 4]", "a")
         self.assertEqual(str(context.exception),
                          "Start and end must be in form [x,y,z]")
 
@@ -46,5 +48,12 @@ class DroneTest(unittest.TestCase):
                          "Start and end points cannot be the same")
 
     def test_calculate_h_vel(self):
-        drone1 = Drone(speed=2,start=[0,0,0],end=[10,0,2],airspace="a")
-        self.assertEqual(drone1.max_h_velocity,[2,0,0])
+        drone1 = Drone(speed=2, start=[0, 0, 0], end=[10, 0, 2], airspace="a")
+        self.assertEqual(drone1.max_h_velocity, [2, 0, 0])
+
+        drone1 = Drone(speed=2, start=[0, 0, 0], end=[2, 2, 2], airspace="a")
+        self.assertEqual(drone1.max_h_velocity, [math.sqrt((2**2)/2), math.sqrt((2**2)/2), 0])
+
+        drone1 = Drone(speed=5, start=[0, 0, 0], end=[18, 24, 0], airspace="a")
+        self.assertEqual(drone1.max_h_velocity, [3, 4, 0])
+
