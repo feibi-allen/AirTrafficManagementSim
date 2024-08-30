@@ -47,13 +47,22 @@ class DroneTest(unittest.TestCase):
         self.assertEqual(str(context.exception),
                          "Start and end points cannot be the same")
 
-    def test_calculate_h_vel(self):
-        drone1 = Drone(speed=2, start=[0, 0, 0], end=[10, 0, 2], airspace="a")
-        self.assertEqual(drone1.max_h_velocity, [2, 0, 0])
+    def test_check_direction_velocity1(self):
+        drone1 = Drone(speed=5, start=[0, 0, 0], end=[18, 24, 0], airspace="a")
+        drone1.go_vertical()
+        self.assertEqual(drone1.get_velocity(), [0, 0, 5])
+        drone1.go_horizontal()
+        self.assertEqual(drone1.get_velocity(), [3, 4, 0])
+
+        drone1 = Drone(speed=3, start=[0, 0, 0], end=[10, 0, 2], airspace="a")
+        drone1.go_vertical()
+        self.assertEqual(drone1.get_velocity(), [0, 0, 3])
+        drone1.go_horizontal()
+        self.assertEqual(drone1.get_velocity(), [3, 0, 0])
 
         drone1 = Drone(speed=2, start=[0, 0, 0], end=[2, 2, 2], airspace="a")
-        self.assertEqual(drone1.max_h_velocity, [math.sqrt((2**2)/2), math.sqrt((2**2)/2), 0])
-
-        drone1 = Drone(speed=5, start=[0, 0, 0], end=[18, 24, 0], airspace="a")
-        self.assertEqual(drone1.max_h_velocity, [3, 4, 0])
-
+        drone1.go_vertical()
+        self.assertEqual(drone1.get_velocity(), [0, 0, 2])
+        drone1.go_horizontal()
+        self.assertEqual(drone1.get_velocity(),
+                         [math.sqrt((2 ** 2) / 2), math.sqrt((2 ** 2) / 2), 0])

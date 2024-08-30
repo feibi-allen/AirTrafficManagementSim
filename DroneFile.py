@@ -87,7 +87,8 @@ class Drone:
 
     def go_horizontal(self):
         for val in self.current_velocity:
-            self.current_velocity[val] = self.max_h_velocity[val]
+            self.current_velocity[:] = self.max_h_velocity[:]
+
 
     def go_vertical(self):
         self.current_velocity = [0, 0, self.max_speed]
