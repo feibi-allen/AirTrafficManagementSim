@@ -100,3 +100,11 @@ class DroneTest(unittest.TestCase):
         drone.go_vertical()
         drone.move(3)
         self.assertEqual(drone.get_position(), [1, -4, 2])
+
+    def test_reach_end(self):
+        drone = Drone(speed=5, start=[1, -4, 9], end=[4, -8, 2], airspace="a")
+        drone.go_vertical()
+        drone.move(3)
+        drone.go_horizontal()
+        drone.move(3)
+        self.assertEqual(drone.get_position(), drone.get_end())
