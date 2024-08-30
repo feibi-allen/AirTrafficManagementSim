@@ -1,4 +1,6 @@
 import math
+
+
 # from AirspaceFile import Airspace
 
 
@@ -6,7 +8,7 @@ class Drone:
     def __init__(self, speed, start, end, airspace):
         # FIXME - error checking for speed and pos correct structure
         # check for correct params
-        if not isinstance(speed,(int,float)):
+        if not isinstance(speed, (int, float)):
             raise TypeError("Speed must be numeric")
         self._check_coord(start)
         self._check_coord(end)
@@ -31,7 +33,7 @@ class Drone:
         if len(param) != 3:
             raise TypeError("Start and end must be in form [x,y,z]")
         for i in param:
-            if not isinstance(i,(int,float)):
+            if not isinstance(i, (int, float)):
                 raise TypeError("[x,y,z] must be numeric")
 
     def _calculate_horizontal_velocity(self):
@@ -44,7 +46,7 @@ class Drone:
         delt_square_sum = delt_x_sq + delt_y_sq
 
         if delt_square_sum == 0:
-            return [0,0,0]
+            return [0, 0, 0]
 
         vel_x = math.sqrt(
             ((self.max_speed ** 2) / delt_square_sum) * delt_x_sq)
@@ -86,12 +88,13 @@ class Drone:
         return self.current_velocity
 
     def go_horizontal(self):
-        for val in self.current_velocity:
-            self.current_velocity[:] = self.max_h_velocity[:]
-
+        self.current_velocity[:] = self.max_h_velocity[:]
 
     def go_vertical(self):
-        self.current_velocity = [0, 0, self.max_speed]
+        if self.start[2] > self.end[2]:
+            self.current_velocity = [0, 0, -abs(self.max_speed)]
+        else:
+            self.current_velocity = [0, 0, self.max_speed]
 
     def stop(self):
         self.current_velocity = [0, 0, 0]
@@ -102,10 +105,9 @@ class Drone:
         else:
             self._move_horizontal(time)
 
-
         if self.pos == self.end:
             print(f"{self},end reached")
-            self.airspace.remove_drone(self)
+            #self.airspace.remove_drone(self)
 
     def _move_horizontal(self, time):
         x_change = self.current_velocity[0] * time
@@ -116,13 +118,17 @@ class Drone:
             self.pos[0] = self.end[0]
             self.pos[1] = self.end[1]
 
-        # FIXME - if change in x is going to happen but x is at end then error
-        # if drone will move past x or y but not both path is incorrectly
-        # calculated and should raise error
-        # elif self._end_between(self.pos[0], x_change, self.end[0]) or \
-        #         self._end_between(self.pos[1], y_change, self.end[1]):
-        #     raise ArithmeticError("Drone path incorrectly followed, end "
-        #                           "between x or y but not both")
+        # error if x or y end is reached but the drone will move off it
+        # this would mean there was an error in velocity calcs
+        elif self._end_between(self.pos[0], x_change, self.end[0]) and \
+                self.current_velocity[0] != 0:
+            raise ArithmeticError("Drone path incorrectly followed, x end "
+                                  "reached but not y")
+
+        elif self._end_between(self.pos[1], y_change, self.end[1]) and \
+                self.current_velocity[1] != 0:
+            raise ArithmeticError("Drone path incorrectly followed, y end "
+                                  "reached but not x")
 
         else:
             self.pos[0] += self.current_velocity[0] * time

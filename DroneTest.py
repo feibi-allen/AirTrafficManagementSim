@@ -60,15 +60,43 @@ class DroneTest(unittest.TestCase):
         drone.go_horizontal()
         self.assertEqual(drone.get_velocity(), [3, 0, 0])
 
-        drone = Drone(speed=2, start=[0, 0, 0], end=[2, 2, 2], airspace="a")
+        drone = Drone(speed=2, start=[0, 0, 2], end=[2, 2, 0], airspace="a")
         drone.go_vertical()
-        self.assertEqual(drone.get_velocity(), [0, 0, 2])
+        self.assertEqual(drone.get_velocity(), [0, 0, -2])
         drone.go_horizontal()
         self.assertEqual(drone.get_velocity(),
                          [math.sqrt((2 ** 2) / 2), math.sqrt((2 ** 2) / 2), 0])
 
-    def test_move_horizontal_once(self):
+    def test_move_horizontal_y(self):
         drone = Drone(speed=7, start=[1,-4,2] ,end=[1,9,2],airspace="a")
         drone.go_horizontal()
         drone.move(1)
         self.assertEqual(drone.get_position(),[1,3,2])
+
+    def test_move_horizontal_x(self):
+        drone = Drone(speed=6, start=[1, -4, 2], end=[-10, -4, 2], airspace="a")
+        drone.go_horizontal()
+        drone.move(1)
+        self.assertEqual(drone.get_position(), [-5, -4, 2])
+
+    def test_reach_end_horizontal(self):
+        """Tests if drone moves through end point that it will stop the drone
+        in that horizontal plane"""
+        drone = Drone(speed=5, start=[1, -4, 1], end=[4, -8, 2], airspace="a")
+        drone.go_horizontal()
+        drone.move(3)
+        self.assertEqual(drone.get_position(), [4, -8, 1])
+
+    def test_move_vertical(self):
+        drone = Drone(speed=6, start=[1, -4, 2], end=[-10, -4, 11],
+                      airspace="a")
+        drone.go_vertical()
+        drone.move(1)
+        self.assertEqual(drone.get_position(), [1, -4, 8])
+
+    def test_reach_end_vertical(self):
+        """Tests if drone moves through end point that it will stop the drone"""
+        drone = Drone(speed=5, start=[1, -4, 9], end=[4, -8, 2], airspace="a")
+        drone.go_vertical()
+        drone.move(3)
+        self.assertEqual(drone.get_position(), [1, -4, 2])
