@@ -1,7 +1,5 @@
 import math
-
-
-# from AirspaceFile import Airspace
+from AirspaceFile import Airspace
 
 
 class Drone:
@@ -24,7 +22,7 @@ class Drone:
         self.max_h_velocity = self._calculate_horizontal_velocity()
         self.current_velocity = [0, 0, 0]
         self.airspace = airspace
-        #airspace.add_drone(self)
+        airspace.add_drone(self)
 
     @staticmethod
     def _check_coord(param):
@@ -107,7 +105,7 @@ class Drone:
 
         if self.pos == self.end:
             print(f"{self},end reached")
-            #self.airspace.remove_drone(self)
+            self.airspace.remove_drone(self)
 
     def _move_horizontal(self, time):
         x_change = self.current_velocity[0] * time

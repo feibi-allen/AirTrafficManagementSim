@@ -95,7 +95,7 @@ class DroneTest(unittest.TestCase):
         self.assertEqual(drone.get_position(), [1, -4, 8])
 
     def test_reach_end_vertical(self):
-        """Tests if drone moves through end point that it will stop the drone"""
+        """Tests if the drone moves through end point that it will stop"""
         drone = Drone(speed=5, start=[1, -4, 9], end=[4, -8, 2], airspace="a")
         drone.go_vertical()
         drone.move(3)
@@ -108,3 +108,6 @@ class DroneTest(unittest.TestCase):
         drone.go_horizontal()
         drone.move(3)
         self.assertEqual(drone.get_position(), drone.get_end())
+
+if __name__ == '__main__':
+    unittest.main()
