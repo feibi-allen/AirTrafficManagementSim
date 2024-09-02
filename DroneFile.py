@@ -4,8 +4,6 @@ from AirspaceFile import Airspace
 
 class Drone:
     def __init__(self, speed, start, end, airspace):
-        # FIXME - error checking for speed and pos correct structure
-        # check for correct params
         if not isinstance(speed, (int, float)):
             raise TypeError("Speed must be numeric")
         self._check_coord(start)
