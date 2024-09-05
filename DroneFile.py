@@ -2,7 +2,7 @@ import math
 
 
 class Drone:
-    def __init__(self, speed, start, end, airspace):
+    def __init__(self, speed, start, end, airspace, id_str):
         from AirspaceFile import Airspace
 
         if not isinstance(speed, (int, float)):
@@ -22,6 +22,7 @@ class Drone:
         self.max_speed = speed  # maximum speed
         self.max_h_velocity = self._calculate_horizontal_velocity()
         self.current_velocity = [0, 0, 0]
+        self.id = str(id_str)
         self.airspace = airspace
         airspace.add_drone(self)
 
@@ -68,6 +69,9 @@ class Drone:
     def get_start(self):
         return self.start
 
+    def get_id(self):
+        return self.id
+
     def get_end(self):
         return self.end
 
@@ -105,7 +109,7 @@ class Drone:
             self._move_horizontal(time)
 
         if self.pos == self.end:
-            print(f"{self},end reached")
+            print(f"{self.id},end reached")
             self.airspace.remove_drone(self)
 
     def _move_horizontal(self, time):
