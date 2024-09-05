@@ -140,6 +140,7 @@ class Airspace(object):
             if x_vel == 0 and y_vel == 0:
                 continue
             else:
+                # FIXME - maths is wrong
                 # print("detecting collision")
                 for other_drone in [d for d in self.drones if d != drone]:
 
