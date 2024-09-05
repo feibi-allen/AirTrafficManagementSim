@@ -1,8 +1,8 @@
 import unittest
-import math
+from unittest.mock import patch
 import simpy
 from DroneFile import Drone
-from AirspaceFile import Airspace, MINIMUM_DISTANCE
+from AirspaceFile import Airspace, COLLISION_DISTANCE
 
 
 class AirspaceTest(unittest.TestCase):
@@ -40,13 +40,26 @@ class AirspaceTest(unittest.TestCase):
         drone7 = Drone(speed=5, start=[10, 0, 0], end=[0, 1, 8],
                        airspace=self.airspace, id_str="7")
         self.airspace.set_drone_target_height()
-        self.assertEqual(drone6.get_target_height(), 2 * MINIMUM_DISTANCE)
-        self.assertEqual(drone7.get_target_height(), 8 * MINIMUM_DISTANCE)
+        self.assertEqual(drone6.get_target_height(), 2 * COLLISION_DISTANCE)
+        self.assertEqual(drone7.get_target_height(), 8 * COLLISION_DISTANCE)
 
-    def test_no_collision(self):
+    @patch('builtins.print')
+    def test_no_collision(self, mock_print):
         Drone(speed=5, start=[0, 0, 0], end=[10, 10, 0],
               airspace=self.airspace, id_str="a")
         Drone(speed=5, start=[15, 15, 0], end=[5, 5, 0],
               airspace=self.airspace, id_str="b")
         self.env.run(until=20)
-        self.assertIsNone(self.airspace.next_collision)
+        # check that "collision imminent" was never printed
+        calls = [call.args[0] for call in mock_print.call_args_list]
+        self.assertNotIn("collision imminent", calls)
+
+    @patch('builtins.print')
+    def test_detect_collision(self, mock_print):
+        Drone(speed=5, start=[0, 0, 0], end=[10, 10, 0],
+              airspace=self.airspace, id_str="c")
+        Drone(speed=5, start=[2, 0, 0], end=[10, 10, 0],
+              airspace=self.airspace, id_str="d")
+        self.env.run(until=20)
+        calls = [call.args[0] for call in mock_print.call_args_list]
+        self.assertIn("collision imminent", calls)

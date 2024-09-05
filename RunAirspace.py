@@ -7,4 +7,8 @@ env = simpy.Environment()
 
 airspace = Airspace(env)
 
-env.run(until=airspace.stop_event | 50)
+Drone(speed=5, start=[0, 0, 0], end=[10, 10, 0],
+      airspace=airspace, id_str="c")
+Drone(speed=5, start=[2, 0, 0], end=[10, 10, 0],
+      airspace=airspace, id_str="d")
+env.run(until=20)

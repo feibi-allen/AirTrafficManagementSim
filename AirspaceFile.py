@@ -2,7 +2,7 @@ import simpy
 import math
 from DroneFile import Drone
 
-MINIMUM_DISTANCE = 1  # closest drones can get to each-other
+COLLISION_DISTANCE = 1  # distance at which drones are considered crashing
 BUFFER_TIME = 1  # time before reaching minimum distance that drones stop
 TIME_STEP = 1  # amount of time between drones position being updated
 
@@ -11,7 +11,7 @@ class Airspace(object):
 
     def __init__(self, env):
         self.drones = []
-        self.next_collision = None
+        self.next_collision = None  # tuple or none (time, drones involved)
         self.env = env
         self.check_collisions_process = env.process(self.run_airspace())
         self.stop_airspace = env.event()
@@ -24,9 +24,11 @@ class Airspace(object):
         # get too close when traveling to their required heights
         for other_drone in self.drones:
             x_pos, y_pos = drone.get_position()[0], drone.get_position()[1]
-            other_x_pos, other_y_pos = other_drone.get_position()[0], other_drone.get_position()[1]
+            other_x_pos, other_y_pos = other_drone.get_position()[0], \
+                other_drone.get_position()[1]
 
-            if math.sqrt(((other_x_pos-x_pos)**2)+((other_y_pos-y_pos)**2)) < MINIMUM_DISTANCE:
+            if math.sqrt(((other_x_pos - x_pos) ** 2) + (
+                    (other_y_pos - y_pos) ** 2)) <= COLLISION_DISTANCE:
                 print("Drones start too close")
                 return
         self.drones.append(drone)
@@ -42,6 +44,9 @@ class Airspace(object):
         :return:
         """
         while self.drones:
+            for drone in self.drones:
+                print(f"{drone.get_id()}:{drone.get_position()}", end=", ")
+            print()
             self.set_drone_target_height()
             self.set_drone_velocities()
 
@@ -52,13 +57,13 @@ class Airspace(object):
                 imminent_collision = False
             while imminent_collision:
                 print("collision imminent")
-                if self.next_collision <= TIME_STEP:
+                if self.next_collision[0] <= TIME_STEP:
                     # faster drone will be one overtaking so must give way
                     self.get_faster_drone().stop()
 
                 self.get_time_of_next_collision()
                 if self.next_collision is None or \
-                        self.next_collision > TIME_STEP:
+                        self.next_collision[0] > TIME_STEP:
                     imminent_collision = False
 
             yield self.env.timeout(TIME_STEP)
@@ -99,17 +104,17 @@ class Airspace(object):
         delta_x = drone.get_end()[0] - drone.get_start()[0]
         delta_y = drone.get_end()[1] - drone.get_start()[1]
         if delta_x >= 0 and delta_y > 0:
-            return 2 * MINIMUM_DISTANCE
+            return 2 * COLLISION_DISTANCE
         if delta_x > 0 and delta_y <= 0:
-            return 4 * MINIMUM_DISTANCE
+            return 4 * COLLISION_DISTANCE
         if delta_x <= 0 and delta_y < 0:
-            return 6 * MINIMUM_DISTANCE
+            return 6 * COLLISION_DISTANCE
         if delta_x < 0 and delta_y >= 0:
-            return 8 * MINIMUM_DISTANCE
+            return 8 * COLLISION_DISTANCE
         raise ArithmeticError("Could not calculate required height")
 
     def get_faster_drone(self):
-        drone1, drone2 = self.next_collision[1][0], self.next_collision[1][2]
+        drone1, drone2 = self.next_collision[1][0], self.next_collision[1][1]
         if drone1.get_speed() >= drone2.get_speed():
             return drone1
         return drone2
@@ -122,7 +127,7 @@ class Airspace(object):
         Sets self.next_collision to the smallest time and drones involved.
         (time,[drone,other_drone]) else if no collision: None
         """
-        collision_time = None
+        collision_info = None
 
         # can be optimised to check pairs only,
         # not all other drones for each drone
@@ -135,15 +140,18 @@ class Airspace(object):
             if x_vel == 0 and y_vel == 0:
                 continue
             else:
-                #print("detecting collision")
+                # print("detecting collision")
                 for other_drone in [d for d in self.drones if d != drone]:
 
-                    # only check for collision if they are on the same height or
-                    # if the other drone is moving vertically so drones flying
-                    # close to each-other on different levels don't count as a
-                    # collision
-                    if other_drone.get_position()[2] == drone.get_position()[2] \
-                           or other_drone.get_velocity()[2] != 0:
+                    # only check for collision if they are on the same height
+                    # or if the other drone is moving horizontally so drones
+                    # flying close to each-other on different levels don't
+                    # count as a collision
+                    if other_drone.get_position()[2] != drone.get_position()[2]:
+                        continue
+                    elif other_drone.get_velocity == [0, 0, 0]:
+                        continue
+                    else:
                         # primary variables
                         other_pos_x = other_drone.get_position()[0]
                         other_pos_y = other_drone.get_position()[1]
@@ -160,8 +168,7 @@ class Airspace(object):
                         # quadratic variables
                         a = (delta_x_vel ** 2) + (delta_y_vel ** 2)
                         b = 2 * (delta_x * delta_x_vel + delta_y * delta_y_vel)
-                        c = (delta_x ** 2) + (delta_y ** 2) - (
-                                MINIMUM_DISTANCE ** 2)
+                        c = (delta_x ** 2) + (delta_y ** 2) - (COLLISION_DISTANCE ** 2)
 
                         # maths equations
                         time_of_collision = \
@@ -169,14 +176,14 @@ class Airspace(object):
                                                           drone, other_drone)
 
                         if time_of_collision is not None:
-                            if collision_time is None:
-                                collision_time = (
+                            if collision_info is None:
+                                collision_info = (
                                     time_of_collision, [drone, other_drone])
-                            elif time_of_collision < collision_time[0]:
-                                collision_time = (
+                            elif time_of_collision < collision_info[0]:
+                                collision_info = (
                                     time_of_collision, [drone, other_drone])
 
-            self.next_collision = collision_time
+            self.next_collision = collision_info
 
     def calculate_collision_time(self, a, b, c, drone, other_drone):
         """
