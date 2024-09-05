@@ -42,12 +42,7 @@ class Airspace(object):
         :return:
         """
         while self.drones:
-            print(self.drones)
-            print("time:",self.env.now)
             self.set_drone_target_height()
-            for drone in self.drones:
-                print(drone.get_target_height())
-                print(drone.get_position())
             self.set_drone_velocities()
 
             self.get_time_of_next_collision()
@@ -56,7 +51,7 @@ class Airspace(object):
             else:
                 imminent_collision = False
             while imminent_collision:
-                print("iminet colision")
+                print("collision imminent")
                 if self.next_collision <= TIME_STEP:
                     # faster drone will be one overtaking so must give way
                     self.get_faster_drone().stop()
@@ -140,7 +135,7 @@ class Airspace(object):
             if x_vel == 0 and y_vel == 0:
                 continue
             else:
-                print("detecting collision")
+                #print("detecting collision")
                 for other_drone in [d for d in self.drones if d != drone]:
 
                     # only check for collision if they are on the same height or
