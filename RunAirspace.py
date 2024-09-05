@@ -1,3 +1,10 @@
+import simpy
+from AirspaceFile import Airspace
 from DroneFile import Drone
 
-Drone(1,[1,2,3],[1,2,4],"a")
+
+env = simpy.Environment()
+
+airspace = Airspace(env)
+
+env.run(until=airspace.stop_event | 50)

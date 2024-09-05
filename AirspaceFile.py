@@ -14,6 +14,7 @@ class Airspace(object):
         self.next_collision = None
         self.env = env
         self.check_collisions_process = env.process(self.run_airspace())
+        self.stop_airspace = env.event()
 
     def add_drone(self, drone):
         # To avoid issues with drones crashing vertically no drones will be
@@ -36,7 +37,8 @@ class Airspace(object):
 
     def run_airspace(self):
         """
-        synchronise and runs the airspace
+        synchronise and runs the airspace until all drones have reached their
+        destination
         :return:
         """
         while self.drones:
@@ -63,6 +65,7 @@ class Airspace(object):
             for drone in self.drones:
                 # logic handled in drone to reduce load on airspace
                 drone.move()
+        self.stop_airspace.succeed()
 
     def set_drone_velocities(self):
         for drone in self.drones:
