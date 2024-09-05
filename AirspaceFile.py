@@ -4,7 +4,7 @@ from DroneFile import Drone
 
 MINIMUM_DISTANCE = 1  # closest drones can get to each-other
 BUFFER_TIME = 1  # time before reaching minimum distance that drones stop
-TIME_BETWEEN_CALCULATIONS = 1  # time between each collision calculation
+TIME_STEP = 1  # amount of time between drones position being updated
 
 
 class Airspace(object):
@@ -51,20 +51,20 @@ class Airspace(object):
             imminent_collision = True
             while imminent_collision:
                 if self.next_collision is not None:
-                    if self.next_collision <= TIME_BETWEEN_CALCULATIONS:
+                    if self.next_collision <= TIME_STEP:
                         # faster drone will be one overtaking so must give way
                         self.get_faster_drone().stop()
 
                 self.get_time_of_next_collision()
                 if self.next_collision is None or \
-                        self.next_collision > TIME_BETWEEN_CALCULATIONS:
+                        self.next_collision > TIME_STEP:
                     imminent_collision = False
 
-            yield self.env.timeout(TIME_BETWEEN_CALCULATIONS)
+            yield self.env.timeout(TIME_STEP)
 
             for drone in self.drones:
                 # logic handled in drone to reduce load on airspace
-                drone.move()
+                drone.move(TIME_STEP)
         self.stop_airspace.succeed()
 
     def set_drone_velocities(self):
