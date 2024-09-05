@@ -61,8 +61,11 @@ class Drone:
         return velocity
 
     @staticmethod
-    def _end_between(upper, lower, end):
-        if upper < end < lower or upper > end > lower:
+    def _end_between(position, change, end):
+        # change should be positive or negative already be signed
+        if position < end < position + change:
+            return True
+        if position > end > position + change:
             return True
         return False
 
@@ -94,7 +97,7 @@ class Drone:
         self.current_velocity[:] = self.max_h_velocity[:]
 
     def go_vertical(self):
-        if self.start[2] > self.end[2]:
+        if self.pos[2] > self.target_height:
             self.current_velocity = [0, 0, -abs(self.max_speed)]
         else:
             self.current_velocity = [0, 0, self.max_speed]
@@ -138,8 +141,11 @@ class Drone:
             self.pos[1] += self.current_velocity[1] * time
 
     def _move_vertical(self, time):
+        print("moving vertical")
+        print(self.id,self.current_velocity)
         z_change = self.current_velocity[2] * time
-        if self._end_between(self.pos[2], z_change, self.end[2]):
-            self.pos[2] = self.end[2]
+        if self._end_between(self.pos[2], z_change, self.target_height):
+            self.pos[2] = self.target_height
         else:
-            self.pos[2] += z_change
+            self.pos[2] += self.current_velocity[2]
+        print(self.id, "moved to", self.pos)

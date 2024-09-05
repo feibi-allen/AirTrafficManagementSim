@@ -33,7 +33,7 @@ class Airspace(object):
 
     def remove_drone(self, drone):
         self.drones.remove(drone)
-        print(f"{drone},removed")
+        print(f"{drone.get_id()},removed")
 
     def run_airspace(self):
         """
@@ -42,18 +42,24 @@ class Airspace(object):
         :return:
         """
         while self.drones:
+            print(self.drones)
+            print("time:",self.env.now)
             self.set_drone_target_height()
+            for drone in self.drones:
+                print(drone.get_target_height())
+                print(drone.get_position())
             self.set_drone_velocities()
 
             self.get_time_of_next_collision()
-
-            # can be simplified to skip while loop if there is no collision
-            imminent_collision = True
+            if self.next_collision is not None:
+                imminent_collision = True
+            else:
+                imminent_collision = False
             while imminent_collision:
-                if self.next_collision is not None:
-                    if self.next_collision <= TIME_STEP:
-                        # faster drone will be one overtaking so must give way
-                        self.get_faster_drone().stop()
+                print("iminet colision")
+                if self.next_collision <= TIME_STEP:
+                    # faster drone will be one overtaking so must give way
+                    self.get_faster_drone().stop()
 
                 self.get_time_of_next_collision()
                 if self.next_collision is None or \
@@ -133,46 +139,47 @@ class Airspace(object):
             # that are not moving horizontally
             if x_vel == 0 and y_vel == 0:
                 continue
+            else:
+                print("detecting collision")
+                for other_drone in [d for d in self.drones if d != drone]:
 
-            for other_drone in [d for d in self.drones if d != drone]:
+                    # only check for collision if they are on the same height or
+                    # if the other drone is moving vertically so drones flying
+                    # close to each-other on different levels don't count as a
+                    # collision
+                    if other_drone.get_position()[2] == drone.get_position()[2] \
+                           or other_drone.get_velocity()[2] != 0:
+                        # primary variables
+                        other_pos_x = other_drone.get_position()[0]
+                        other_pos_y = other_drone.get_position()[1]
 
-                # only check for collision if they are on the same height or
-                # if the other drone is moving vertically so drones flying
-                # close to each-other on different levels don't count as a
-                # collision
-                if other_drone.get_position()[2] == drone.get_position()[2] \
-                       or other_drone.get_velocity()[2] != 0:
-                    # primary variables
-                    other_pos_x = other_drone.get_position()[0]
-                    other_pos_y = other_drone.get_position()[1]
+                        other_x_vel = other_drone.get_velocity()[0]
+                        other_y_vel = other_drone.get_velocity()[1]
 
-                    other_x_vel = other_drone.get_velocity()[0]
-                    other_y_vel = other_drone.get_velocity()[1]
+                        # secondary variables
+                        delta_x = other_pos_x - pos_x
+                        delta_x_vel = other_x_vel - x_vel
+                        delta_y = other_pos_y - pos_y
+                        delta_y_vel = other_y_vel - y_vel
 
-                    # secondary variables
-                    delta_x = other_pos_x - pos_x
-                    delta_x_vel = other_x_vel - x_vel
-                    delta_y = other_pos_y - pos_y
-                    delta_y_vel = other_y_vel - y_vel
+                        # quadratic variables
+                        a = (delta_x_vel ** 2) + (delta_y_vel ** 2)
+                        b = 2 * (delta_x * delta_x_vel + delta_y * delta_y_vel)
+                        c = (delta_x ** 2) + (delta_y ** 2) - (
+                                MINIMUM_DISTANCE ** 2)
 
-                    # quadratic variables
-                    a = (delta_x_vel ** 2) + (delta_y_vel ** 2)
-                    b = 2 * (delta_x * delta_x_vel + delta_y * delta_y_vel)
-                    c = (delta_x ** 2) + (delta_y ** 2) - (
-                            MINIMUM_DISTANCE ** 2)
+                        # maths equations
+                        time_of_collision = \
+                            self.calculate_collision_time(a, b, c,
+                                                          drone, other_drone)
 
-                    # maths equations
-                    time_of_collision = \
-                        self.calculate_collision_time(a, b, c,
-                                                      drone, other_drone)
-
-                    if time_of_collision is not None:
-                        if collision_time is None:
-                            collision_time = (
-                                time_of_collision, [drone, other_drone])
-                        elif time_of_collision < collision_time[0]:
-                            collision_time = (
-                                time_of_collision, [drone, other_drone])
+                        if time_of_collision is not None:
+                            if collision_time is None:
+                                collision_time = (
+                                    time_of_collision, [drone, other_drone])
+                            elif time_of_collision < collision_time[0]:
+                                collision_time = (
+                                    time_of_collision, [drone, other_drone])
 
             self.next_collision = collision_time
 
