@@ -16,7 +16,18 @@ class Airspace(object):
         self.check_collisions_process = env.process(self.run_airspace())
 
     def add_drone(self, drone):
-        # FIXME - check for not occupying same column or being too close
+        # To avoid issues with drones crashing vertically no drones will be
+        # able to start in the same column.
+        # additional checks can be made to allow more drones to be added:
+        # check target height of drones when adding, then check if drones will
+        # get too close when traveling to their required heights
+        for other_drone in self.drones:
+            x_pos, y_pos = drone.get_position()[0], drone.get_position()[1]
+            other_x_pos, other_y_pos = other_drone.get_position()[0], other_drone.get_position()[1]
+
+            if math.sqrt(((other_x_pos-x_pos)**2)+((other_y_pos-y_pos)**2)) < MINIMUM_DISTANCE:
+                print("Drones start too close")
+                return
         self.drones.append(drone)
 
     def remove_drone(self, drone):
@@ -89,8 +100,9 @@ class Airspace(object):
             return 4 * MINIMUM_DISTANCE
         if delta_x <= 0 and delta_y < 0:
             return 6 * MINIMUM_DISTANCE
-        if delta_x > 0 and delta_y >= 0:
+        if delta_x < 0 and delta_y >= 0:
             return 8 * MINIMUM_DISTANCE
+        raise ArithmeticError("Could not calculate required height")
 
     def get_faster_drone(self):
         drone1, drone2 = self.next_collision[1][0], self.next_collision[1][2]

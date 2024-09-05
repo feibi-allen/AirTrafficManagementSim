@@ -68,13 +68,14 @@ class DroneTest(unittest.TestCase):
                          [math.sqrt((2 ** 2) / 2), math.sqrt((2 ** 2) / 2), 0])
 
     def test_move_horizontal_y(self):
-        drone = Drone(speed=7, start=[1,-4,2] ,end=[1,9,2],airspace="a")
+        drone = Drone(speed=7, start=[1, -4, 2], end=[1, 9, 2], airspace="a")
         drone.go_horizontal()
         drone.move(1)
-        self.assertEqual(drone.get_position(),[1,3,2])
+        self.assertEqual(drone.get_position(), [1, 3, 2])
 
     def test_move_horizontal_x(self):
-        drone = Drone(speed=6, start=[1, -4, 2], end=[-10, -4, 2], airspace="a")
+        drone = Drone(speed=6, start=[1, -4, 2], end=[-10, -4, 2],
+                      airspace="a")
         drone.go_horizontal()
         drone.move(1)
         self.assertEqual(drone.get_position(), [-5, -4, 2])
@@ -109,5 +110,7 @@ class DroneTest(unittest.TestCase):
         drone.move(3)
         self.assertEqual(drone.get_position(), drone.get_end())
 
-if __name__ == '__main__':
-    unittest.main()
+# FIXME - more tests
+    # zero speed
+    #small movements
+

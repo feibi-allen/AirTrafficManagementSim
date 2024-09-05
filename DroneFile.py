@@ -1,15 +1,18 @@
 import math
-from AirspaceFile import Airspace
 
 
 class Drone:
     def __init__(self, speed, start, end, airspace):
+        from AirspaceFile import Airspace
+
         if not isinstance(speed, (int, float)):
             raise TypeError("Speed must be numeric")
         self._check_coord(start)
         self._check_coord(end)
         if start == end:
             raise ValueError("Start and end points cannot be the same")
+        if speed == 0:
+            raise ValueError("Speed cannot be 0")
 
         # assign attributes
         self.pos = start
