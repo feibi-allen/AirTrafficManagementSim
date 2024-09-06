@@ -168,9 +168,7 @@ class Airspace(object):
                         c = (diff_x ** 2) + (diff_y ** 2) - (COLLISION_DISTANCE ** 2)
 
                         # maths equations
-                        time_of_collision = \
-                            self.calculate_collision_time(a, b, c,
-                                                          drone, other_drone)
+                        time_of_collision = self.calculate_collision_time(a, b, c, drone, other_drone)
 
                         if time_of_collision is not None:
                             if collision_info is None:
