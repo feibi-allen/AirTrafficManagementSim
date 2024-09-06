@@ -15,7 +15,7 @@ class Drone:
             raise ValueError("Speed cannot be 0")
 
         # assign attributes
-        self.pos = start
+        self.pos = start.copy()
         self.start = start
         self.end = end
         self.target_height = start[2]
@@ -103,6 +103,7 @@ class Drone:
             self.current_velocity = [0, 0, self.max_speed]
 
     def stop(self):
+        print(f"{self.id},stopping")
         self.current_velocity = [0, 0, 0]
 
     def move(self, time):
@@ -116,6 +117,7 @@ class Drone:
             self.airspace.remove_drone(self)
 
     def _move_horizontal(self, time):
+        print(f"{self.id}, moving horizontal")
         x_change = self.current_velocity[0] * time
         y_change = self.current_velocity[1] * time
 
@@ -141,6 +143,7 @@ class Drone:
             self.pos[1] += self.current_velocity[1] * time
 
     def _move_vertical(self, time):
+        print(f"{self.id}, moving vertical")
         z_change = self.current_velocity[2] * time
         if self._end_between(self.pos[2], z_change, self.target_height):
             self.pos[2] = self.target_height

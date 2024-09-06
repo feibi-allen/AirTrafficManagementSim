@@ -9,6 +9,6 @@ airspace = Airspace(env)
 
 Drone(speed=5, start=[0, 0, 0], end=[10, 10, 0],
       airspace=airspace, id_str="c")
-Drone(speed=5, start=[2, 0, 0], end=[10, 10, 0],
+Drone(speed=3, start=[2, 0, 0], end=[10, 10, 0],
       airspace=airspace, id_str="d")
 env.run(until=20)

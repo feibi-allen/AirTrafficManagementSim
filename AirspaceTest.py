@@ -58,8 +58,11 @@ class AirspaceTest(unittest.TestCase):
     def test_detect_collision(self, mock_print):
         Drone(speed=5, start=[0, 0, 0], end=[10, 10, 0],
               airspace=self.airspace, id_str="c")
-        Drone(speed=5, start=[2, 0, 0], end=[10, 10, 0],
+        Drone(speed=3, start=[2, 0, 0], end=[10, 10, 0],
               airspace=self.airspace, id_str="d")
+
         self.env.run(until=20)
-        calls = [call.args[0] for call in mock_print.call_args_list]
+
+        calls = [call.args[0] for call in mock_print.call_args_list if
+                 call.args]
         self.assertIn("collision imminent", calls)
