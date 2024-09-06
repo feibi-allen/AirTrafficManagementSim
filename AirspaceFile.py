@@ -151,7 +151,6 @@ class Airspace(object):
                 continue
 
             else:
-                # FIXME - maths is wrong
                 for other_drone in [d for d in self.drones if d != drone]:
                     # reduce number of calculations by only checking for a
                     # collision if drones are on the same height level
