@@ -139,18 +139,14 @@ class Airspace(object):
             # that are not moving horizontally
             if x_vel == 0 and y_vel == 0:
                 continue
+
             else:
                 # FIXME - maths is wrong
-                # print("detecting collision")
                 for other_drone in [d for d in self.drones if d != drone]:
-
-                    # only check for collision if they are on the same height
-                    # or if the other drone is moving horizontally so drones
-                    # flying close to each-other on different levels don't
-                    # count as a collision
-                    if other_drone.get_position()[2] != drone.get_position()[2]:
-                        continue
-                    elif other_drone.get_velocity == [0, 0, 0]:
+                    # reduce number of calculations by only checking for a
+                    # collision if drones are on the same height level
+                    # or the other drone is moving vertically
+                    if other_drone.get_position()[2] != drone.get_position()[2] and other_drone.get_velocity[2] == 0:
                         continue
                     else:
                         # primary variables
@@ -161,15 +157,15 @@ class Airspace(object):
                         other_y_vel = other_drone.get_velocity()[1]
 
                         # secondary variables
-                        delta_x = other_pos_x - pos_x
-                        delta_x_vel = other_x_vel - x_vel
-                        delta_y = other_pos_y - pos_y
-                        delta_y_vel = other_y_vel - y_vel
+                        diff_x = other_pos_x - pos_x
+                        diff_x_vel = other_x_vel - x_vel
+                        diff_y = other_pos_y - pos_y
+                        diff_y_vel = other_y_vel - y_vel
 
                         # quadratic variables
-                        a = (delta_x_vel ** 2) + (delta_y_vel ** 2)
-                        b = 2 * (delta_x * delta_x_vel + delta_y * delta_y_vel)
-                        c = (delta_x ** 2) + (delta_y ** 2) - (COLLISION_DISTANCE ** 2)
+                        a = (diff_x_vel ** 2) + (diff_y_vel ** 2)
+                        b = 2 * (diff_x * diff_x_vel + diff_y * diff_y_vel)
+                        c = (diff_x ** 2) + (diff_y ** 2) - (COLLISION_DISTANCE ** 2)
 
                         # maths equations
                         time_of_collision = \
@@ -200,22 +196,21 @@ class Airspace(object):
         """
         if a == 0:
             return None
-        if (b ** 2) == 4 * a * c:
-            time_of_collision = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (
-                    2 * a)
-            # print("point of collision", time_of_collision)
-            if self._in_range(drone, other_drone, time_of_collision):
-                # print("within range")
-                return time_of_collision
-        if (b ** 2) > 4 * a * c:
-            time_of_collision_1 = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (
-                    2 * a)
-            time_of_collision_2 = (-b - math.sqrt((b ** 2) - 4 * a * c)) / (
-                    2 * a)
 
-            if self._in_range(drone, other_drone,
-                              min(time_of_collision_2, time_of_collision_1)):
-                return min(time_of_collision_2, time_of_collision_1)
+        if (b ** 2) == 4 * a * c:
+            time = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (2 * a)
+            if self._in_range(drone, other_drone, time):
+                return time
+
+        if (b ** 2) > 4 * a * c:
+            time_1 = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (
+                    2 * a)
+            time_2 = (-b - math.sqrt((b ** 2) - 4 * a * c)) / (
+                    2 * a)
+            time = min(time_2, time_1)
+            if self._in_range(drone, other_drone, time):
+                return time
+
         return None
 
     def _in_range(self, drone, other_drone, time_of_collision):
