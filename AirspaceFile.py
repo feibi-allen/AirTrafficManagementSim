@@ -15,6 +15,7 @@ class Airspace(object):
         self.env = env
         self.check_collisions_process = env.process(self.run_airspace())
         self.stop_airspace = env.event()
+        self.text_flag_collision_occurred = False
 
     def add_drone(self, drone):
         # To avoid issues with drones crashing vertically no drones will be
@@ -57,6 +58,7 @@ class Airspace(object):
                 imminent_collision = False
             while imminent_collision:
                 print("collision imminent")
+                self.text_flag_collision_occurred = True
                 if self.next_collision[0] <= TIME_STEP:
                     # faster drone will be one overtaking so must give way
                     self.get_drone_to_stop().stop()
@@ -155,8 +157,7 @@ class Airspace(object):
                     # reduce number of calculations by only checking for a
                     # collision if drones are on the same height level
                     # or the other drone is moving vertically
-                    if other_drone.get_position()[2] != drone.get_position()[
-                        2] and other_drone.get_velocity[2] == 0:
+                    if other_drone.get_position()[2] != drone.get_position()[2] and other_drone.get_velocity()[2] == 0:
                         continue
                     else:
                         # primary variables
@@ -176,7 +177,7 @@ class Airspace(object):
                         a = (diff_x_vel ** 2) + (diff_y_vel ** 2)
                         b = 2 * (diff_x * diff_x_vel + diff_y * diff_y_vel)
                         c = (diff_x ** 2) + (diff_y ** 2) - (
-                                    COLLISION_DISTANCE ** 2)
+                                COLLISION_DISTANCE ** 2)
 
                         # maths equations
                         time_of_collision = self.calculate_collision_time(a, b,
