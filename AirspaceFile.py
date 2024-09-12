@@ -13,7 +13,7 @@ class Airspace(object):
         self.drones = []
         self.next_collision = None  # tuple or none (time, drones involved)
         self.env = env
-        self.check_collisions_process = env.process(self.run_airspace())
+        self.check_collisions_process = env.process(self.run_airspace)
         self.stop_airspace = env.event()
         self.text_flag_collision_occurred = False
 
@@ -38,6 +38,7 @@ class Airspace(object):
         self.drones.remove(drone)
         print(f"{drone.get_id()},removed")
 
+    @property
     def run_airspace(self):
         """
         synchronise and runs the airspace until all drones have reached their
@@ -57,10 +58,9 @@ class Airspace(object):
             else:
                 imminent_collision = False
             while imminent_collision:
-                print("collision imminent")
+                print(f"collision imminent: {self.next_collision[1][0].get_id(),self.next_collision[1][1].get_id()}")
                 self.text_flag_collision_occurred = True
                 if self.next_collision[0] <= TIME_STEP:
-                    # faster drone will be one overtaking so must give way
                     self.get_drone_to_stop().stop()
 
                 self.get_time_of_next_collision()
@@ -71,7 +71,6 @@ class Airspace(object):
             yield self.env.timeout(TIME_STEP)
 
             for drone in self.drones:
-                # logic handled in drone to reduce load on airspace
                 drone.move(TIME_STEP)
         self.stop_airspace.succeed()
 

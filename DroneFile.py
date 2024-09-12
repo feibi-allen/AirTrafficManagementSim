@@ -144,7 +144,7 @@ class Drone:
             self.pos[1] += self.current_velocity[1] * time
 
     def _move_vertical(self, time):
-        print(f"{self.id}, moving vertical")
+        print(f"{self.id},moving vertical")
         z_change = self.current_velocity[2] * time
         if self._end_between(self.pos[2], z_change, self.target_height):
             self.pos[2] = self.target_height

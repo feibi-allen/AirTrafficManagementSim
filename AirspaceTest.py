@@ -60,4 +60,11 @@ class AirspaceTest(unittest.TestCase):
         self.assertEqual(self.airspace.text_flag_collision_occurred, True)
 
     def test_collision_resolve(self):
-        # fill
+        Drone(speed=5, start=[0, 0, 0], end=[10, 10, 0],
+              airspace=self.airspace, id_str="e")
+        Drone(speed=3, start=[2, 0, 0], end=[10, 10, 0],
+              airspace=self.airspace, id_str="f")
+        Drone(speed=3, start=[0, 4, 0], end=[10, 10, 0],
+              airspace=self.airspace, id_str="g")
+        self.env.run(until=20)
+        self.assertEqual(self.airspace.drones, [])
