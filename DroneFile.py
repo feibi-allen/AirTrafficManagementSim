@@ -113,12 +113,8 @@ class Drone:
         else:
             self._move_horizontal(time)
 
-        if self.pos == self.end:
-            print(f"{self.id},end reached")
-            self.airspace.remove_drone(self)
-
     def _move_horizontal(self, time):
-        print(f"{self.id}, moving horizontal")
+        print(f"{self.id}, moving horizontal at {self.get_velocity()}")
         x_change = self.current_velocity[0] * time
         y_change = self.current_velocity[1] * time
 
@@ -144,9 +140,13 @@ class Drone:
             self.pos[1] += self.current_velocity[1] * time
 
     def _move_vertical(self, time):
-        print(f"{self.id},moving vertical")
+        print(f"{self.id},moving vertical at {self.get_velocity()}")
         z_change = self.current_velocity[2] * time
         if self._end_between(self.pos[2], z_change, self.target_height):
             self.pos[2] = self.target_height
         else:
             self.pos[2] += self.current_velocity[2]
+
+    def end_reached(self):
+        if self.pos == self.end:
+            return True

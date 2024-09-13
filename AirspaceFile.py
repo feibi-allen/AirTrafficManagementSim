@@ -53,6 +53,7 @@ class Airspace(object):
             self.set_drone_velocities()
 
             self.get_time_of_next_collision()
+
             if self.next_collision is not None:
                 imminent_collision = True
             else:
@@ -72,6 +73,12 @@ class Airspace(object):
 
             for drone in self.drones:
                 drone.move(TIME_STEP)
+
+            for drone in self.drones:
+                if drone.end_reached():
+                    print(f"{drone.get_id()}, end reached")
+                    self.remove_drone(drone)
+
         self.stop_airspace.succeed()
 
     def set_drone_velocities(self):
@@ -138,6 +145,8 @@ class Airspace(object):
         Sets self.next_collision to the smallest time and drones involved.
         (time,[drone,other_drone]) else if no collision: None
         """
+        print("checking for collision")
+
         self.next_collision = None
 
         # can be optimised to check pairs only,
