@@ -61,15 +61,6 @@ class Drone:
 
         return velocity
 
-    @staticmethod
-    def _end_between(position, change, end):
-        # change should be positive or negative already be signed
-        if position < end < position + change:
-            return True
-        if position > end > position + change:
-            return True
-        return False
-
     def get_start(self):
         return self.start
 
@@ -118,19 +109,19 @@ class Drone:
         x_change = self.current_velocity[0] * time
         y_change = self.current_velocity[1] * time
 
-        if self._end_between(self.pos[0], x_change, self.end[0]) and \
-                self._end_between(self.pos[1], y_change, self.end[1]):
+        if self.end_between(self.pos[0], x_change, self.end[0]) and \
+                self.end_between(self.pos[1], y_change, self.end[1]):
             self.pos[0] = self.end[0]
             self.pos[1] = self.end[1]
 
         # error if x or y end is reached but the drone will move off it
         # this would mean there was an error in velocity calcs
-        elif self._end_between(self.pos[0], x_change, self.end[0]) and \
+        elif self.end_between(self.pos[0], x_change, self.end[0]) and \
                 self.current_velocity[0] != 0:
             raise ArithmeticError("Drone path incorrectly followed, x end "
                                   "reached but not y")
 
-        elif self._end_between(self.pos[1], y_change, self.end[1]) and \
+        elif self.end_between(self.pos[1], y_change, self.end[1]) and \
                 self.current_velocity[1] != 0:
             raise ArithmeticError("Drone path incorrectly followed, y end "
                                   "reached but not x")
@@ -142,10 +133,19 @@ class Drone:
     def _move_vertical(self, time):
         print(f"{self.id},moving vertical at {self.get_velocity()}")
         z_change = self.current_velocity[2] * time
-        if self._end_between(self.pos[2], z_change, self.target_height):
+        if self.end_between(self.pos[2], z_change, self.target_height):
             self.pos[2] = self.target_height
         else:
             self.pos[2] += self.current_velocity[2]
+
+    @staticmethod
+    def end_between(position, change, end):
+        # change should be positive or negative already be signed
+        if position < end < position + change:
+            return True
+        if position > end > position + change:
+            return True
+        return False
 
     def end_reached(self):
         if self.pos == self.end:

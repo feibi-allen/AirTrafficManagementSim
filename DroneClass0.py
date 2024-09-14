@@ -99,7 +99,7 @@ class Drone(object):
         :return:
         """
         while True:
-            collision = self.airspace.get_time_of_next_collision(self)
+            collision = self.airspace.check_for_collision(self)
             print(f"checking {self.id} for collision: {collision} at time {self.env.now}")
 
             if not collision:
