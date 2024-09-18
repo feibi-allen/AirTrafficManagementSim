@@ -20,7 +20,7 @@ To run the program:
 
 - Create and environment using the SimPy library
 - Create an instance of an airspace (takes the environment as a parameter)
-- Create instances of drones, Drone(speed,start_coord,end_coord,airspace,ID)
+- Create instances of drones, Drone(speed,start_coord,end_coord,airspace,ID).
 This adds them to the airspace
 - Run the environment for chosen amount of time
 
