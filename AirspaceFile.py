@@ -59,7 +59,7 @@ class Airspace(object):
             else:
                 imminent_collision = False
             while imminent_collision:
-                print(f"collision imminent: {self.next_collision[1][0].get_id(),self.next_collision[1][1].get_id()}")
+                print(f"collision imminent: {self.next_collision[1][0].get_id(), self.next_collision[1][1].get_id()}")
                 self.text_flag_collision_occurred = True
                 if self.next_collision[0] <= TIME_STEP:
                     self.get_drone_to_stop().stop()
@@ -139,9 +139,6 @@ class Airspace(object):
 
     def check_for_collision(self):
         """
-        Calculates time (from drones current position) to which safety
-        circumference around the drones will intersect based on position
-        and velocity. (quadratic of distance between drones against time)
         Sets self.next_collision to the smallest time and drones involved.
         (time,[drone,other_drone]) else if no collision: None
         """
@@ -164,7 +161,7 @@ class Airspace(object):
                     if other_drone.get_position()[2] != drone.get_position()[2] and other_drone.get_velocity()[2] == 0:
                         continue
                     else:
-                        time_of_collision = self.calculate_time_of_intersection(drone, other_drone)
+                        time_of_collision = self._calculate_time_of_intersection(drone, other_drone)
 
                         if time_of_collision is not None:
                             if self.next_collision is None:
@@ -174,7 +171,15 @@ class Airspace(object):
                                 self.next_collision = (
                                     time_of_collision, [drone, other_drone])
 
-    def calculate_time_of_intersection(self, drone, other_drone):
+    def _calculate_time_of_intersection(self, drone, other_drone):
+        """
+        Calculates time (from drones current position) to which safety
+        circumference around the drones will intersect based on position
+        and velocity. (quadratic of distance between drones against time)
+        :param drone:
+        :param other_drone:
+        :return:
+        """
         # primary variables
         pos_x, pos_y = drone.get_position()[0], drone.get_position()[1]
         x_vel, y_vel = drone.get_velocity()[0], drone.get_velocity()[1]
@@ -192,36 +197,71 @@ class Airspace(object):
         b = 2 * (diff_x * diff_x_vel + diff_y * diff_y_vel)
         c = (diff_x ** 2) + (diff_y ** 2) - (
                 COLLISION_DISTANCE ** 2)
+
         time_of_collision = None
-        if (b ** 2) == 4 * a * c:
-            time = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (2 * a)
-            if self._in_range(drone, other_drone, time):
-                time_of_collision = time
-        if (b ** 2) > 4 * a * c:
+
+        if a != 0 and (b ** 2) >= 4 * a * c:
             time_1 = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (
                     2 * a)
             time_2 = (-b - math.sqrt((b ** 2) - 4 * a * c)) / (
                     2 * a)
             time = min(time_2, time_1)
-            if self._in_range(drone, other_drone, time):
+            if self._in_range(drone, time) and self._in_range(other_drone, time):
                 time_of_collision = time
+
+        if drone.end_between(drone.get_position()[0], drone.get_velocity()[0] * TIME_STEP,
+                             drone.get_end()[0]) and drone.end_between(drone.get_position()[0],
+                                                                 drone.get_velocity()[0] * TIME_STEP, drone.get_end()[0]):
+            time_of_collision = self._calculate_end_collision(drone.get_end(), self._time_to_arrival(drone),
+                                                              other_drone)
+        if other_drone.end_between(other_drone.get_position()[0], other_drone.get_velocity()[0] * TIME_STEP,
+                                   other_drone.get_end()[0]) and other_drone.end_between(other_drone.get_position()[0],
+                                                                                   other_drone.get_velocity()[
+                                                                                       0] * TIME_STEP,
+                                                                                   other_drone.get_end()[0]):
+            time_of_collision = self._calculate_end_collision(other_drone.get_end(), self._time_to_arrival(other_drone),
+                                                              drone)
+
         return time_of_collision
 
-    def _in_range(self, drone, other_drone, time_of_collision):
+    def _calculate_end_collision(self, position, time_of_other_drone_end, drone):
+        """
+        Calculates time at which a drone will intersect with the other drones end (if applicable)
+        :param position:
+        :param time_of_other_drone_end:
+        :param drone:
+        :return:
+        """
+        x_vel = drone.get_velocity()[0]
+        y_vel = drone.get_velocity()[1]
+        x_pos = drone.get_position()[0]
+        y_pos = drone.get_position()[1]
+
+        a = (x_vel ** 2) + (y_vel ** 2)
+        b = ((x_pos - position[0]) * x_vel) + ((y_pos - position[1]) * y_vel)
+        c = ((x_pos - position[0]) ** 2) + ((y_pos - position[1]) ** 2) - (COLLISION_DISTANCE ** 2)
+
+        if a != 0 and (b ** 2) >= 4 * a * c:
+            time_1 = (-b + math.sqrt((b ** 2) - 4 * a * c)) / (
+                    2 * a)
+            time_2 = (-b - math.sqrt((b ** 2) - 4 * a * c)) / (
+                    2 * a)
+            min_time = min(time_2, time_1)
+            if self._in_range(drone, min_time) and min_time >= time_of_other_drone_end:
+                return min_time
+        return None
+
+    def _in_range(self, drone, time_of_collision):
         """
         Checks if intersection of drone paths will happen within path ranges
         :param drone:
-        :param other_drone:
         :param time_of_collision:
         :return:
         """
         if time_of_collision < 0:
             return False
         try:
-
             if time_of_collision >= self._time_to_arrival(drone):
-                return False
-            if time_of_collision >= self._time_to_arrival(other_drone):
                 return False
         except ZeroDivisionError:
             return True
