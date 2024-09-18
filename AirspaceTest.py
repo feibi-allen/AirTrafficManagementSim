@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import patch
 import simpy
 from DroneFile import Drone
 from AirspaceFile import Airspace, COLLISION_DISTANCE
