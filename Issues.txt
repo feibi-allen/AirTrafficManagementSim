@@ -1,15 +1,15 @@
 Drones:
-- collision resolve
-    - priority
-    - speed
+- collision resolve /
+    - priority /
+    - speed /
 
 - collision checking
     - reduce number of checks a drone must do by only checking adjacent (ish) positions
         perhaps using graphs?
 
-- starting protection
+- starting protection /
 
-- paths in opposite directions
+- paths in opposite directions /
     - hot to resolve
 
-- if there is a collision very shortly after another this is bad because it won't detect it
+- if there is a collision very shortly after another this is bad because it won't detect it /
