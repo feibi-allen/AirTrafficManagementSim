@@ -11,7 +11,7 @@ The airspace is represented by coordinates [x,y,z] with no limit on values.
 ## Protocols
 To manage the airspace a number of protocols are used:
 - Drones cannot move vertically unless taking off and landing
-- Drones which ate taking off and landing cannot move horizontally
+- Drones which are taking off and landing cannot move horizontally
 - Drones moving horizontally must fly at designated height according to heading 
 (similar to Visual Flight Rules used in aviation)
 
