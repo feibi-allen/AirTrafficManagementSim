@@ -14,7 +14,7 @@ class Airspace(object):
         self.drones = []
         self.next_collision = None  # tuple or none (time, drones involved)
         self.env = env
-        self.check_collisions_process = env.process(self.run_airspace)
+        self.check_collisions_process = env.process(self.run_airspace())
         self.stop_airspace = env.event()
         self.text_flag_collision_occurred = False
         self.simulation = gs.Simulation([(0,10),(0,15),(0,5)])
@@ -40,7 +40,6 @@ class Airspace(object):
         self.drones.remove(drone)
         print(f"{drone.get_id()},removed")
 
-    @property
     def run_airspace(self):
         """
         synchronise and runs the airspace until all drones have reached their
