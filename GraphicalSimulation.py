@@ -13,7 +13,7 @@ class Simulation:
         self.scat = self.axis.scatter([], [], [])
 
     def update_plot(self, drones):
-        positions = [drone.get_pos() for drone in drones]
+        positions = [drone.get_position() for drone in drones]
         x_coords, y_coords, z_coords = zip(*positions)
         self.scat._offsets3d = (x_coords, y_coords, z_coords)
         plt.show()
