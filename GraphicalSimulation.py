@@ -16,4 +16,5 @@ class Simulation:
         positions = [drone.get_position() for drone in drones]
         x_coords, y_coords, z_coords = zip(*positions)
         self.scat._offsets3d = (x_coords, y_coords, z_coords)
-        plt.show()
+        plt.draw()
+        plt.pause(0.5)

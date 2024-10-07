@@ -76,7 +76,9 @@ class Airspace(object):
             for drone in self.drones:
                 drone.move(TIME_STEP)
 
+            # matplot
             self.simulation.update_plot(self.drones)
+
 
             for drone in self.drones:
                 if drone.end_reached():
