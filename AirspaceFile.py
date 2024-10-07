@@ -41,18 +41,20 @@ class Airspace(object):
         print(f"{drone.get_id()},removed")
 
     def _find_min_max(self, pos):
-        min_val = None
-        max_val = None
+        min_val = 0
+        max_val = 10
         for drone in self.drones:
-            val = drone.get_position()[pos]
-            if max_val is None:
+            val = drone.get_start()[pos]
+            if val > max_val:
                 max_val = val
-            elif val > max_val:
+            if val < min_val:
+                min_val = val
+            val = drone.get_end()[pos]
+            if val > max_val:
                 max_val = val
-            if min_val is None:
+            if val < min_val:
                 min_val = val
-            elif val < min_val:
-                min_val = val
+
         return min_val, max_val
 
     def run_airspace(self):
@@ -61,6 +63,7 @@ class Airspace(object):
         destination
         :return:
         """
+        # instantiate simulation
         self.simulation = gs.Simulation(self._find_min_max(0),self._find_min_max(1),self._find_min_max(2))
 
         while self.drones:
