@@ -17,7 +17,7 @@ class Airspace(object):
         self.check_collisions_process = env.process(self.run_airspace)
         self.stop_airspace = env.event()
         self.text_flag_collision_occurred = False
-        self.simulation = gs.Simulation([(0,10),(0,15),(0,20)])
+        self.simulation = gs.Simulation([(0,10),(0,15),(0,5)])
 
     def add_drone(self, drone):
         # To avoid issues with drones crashing vertically no drones will be
@@ -76,9 +76,7 @@ class Airspace(object):
             for drone in self.drones:
                 drone.move(TIME_STEP)
 
-            # matplot
             self.simulation.update_plot(self.drones)
-
 
             for drone in self.drones:
                 if drone.end_reached():
