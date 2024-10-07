@@ -4,12 +4,12 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 class Simulation:
-    def __init__(self, limits):
+    def __init__(self, x_lim,y_lim,z_lim):
         self.fig = plt.figure()
         self.axis = self.fig.add_subplot(111, projection='3d')
-        self.axis.set_xlim(limits[0])
-        self.axis.set_ylim(limits[1])
-        self.axis.set_zlim(limits[2])
+        self.axis.set_xlim(x_lim)
+        self.axis.set_ylim(y_lim)
+        self.axis.set_zlim(z_lim)
         self.scat = self.axis.scatter([], [], [])
 
     def update_plot(self, drones):
